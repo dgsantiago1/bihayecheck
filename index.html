@@ -525,10 +525,8 @@ function onPos(pos){
   /* Distance: reject poor quality points */
   if(lastLat!==null){
     var seg=haversine(lastLat,lastLon,lat,lon);
-    if(seg*1000>acc && seg*1000>3) totalDist+=seg;
+    if(seg*1000>acc) totalDist+=seg;
     document.getElementById('distVal').textContent=totalDist.toFixed(3);
-}
-lastLat=lat; lastLon=lon;
   }
   lastLat=lat; lastLon=lon;
 
