@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Biyahe Check</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Code+Pro:wght@400;500&display=swap');
+
+/* Maroons Sharp via CDN */
+@font-face {
+  font-family: 'MaroonsSharp';
+  src: url('https://cdn.jsdelivr.net/gh/mozilla/fira@4.202/ttf/FiraSans-Heavy.ttf') format('truetype');
+}
+
+:root {
+  --bg:       #1a0a0a;
+  --surface:  #2a1010;
+  --surface2: #3a1a10;
+  --border:   rgba(212,175,55,0.2);
+  --maroon:   #7a1a1a;
+  --maroon2:  #921f1f;
+  --gold:     #D4AF37;
+  --gold2:    #F0C040;
+  --green:    #1a4a1a;
+  --green2:   #2d6e2d;
+  --cream:    #FFF8E7;
+  --tan:      #C4956A;
+  --mauve:    #6B5B7B;
+  --text:     #FFF8E7;
+  --muted:    rgba(255,248,231,0.5);
+  --red:      #E05050;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(212,175,55,0.04) 28px, rgba(212,175,55,0.04) 29px),
+    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(212,175,55,0.04) 28px, rgba(212,175,55,0.04) 29px);
+  color: var(--text);
+  font-family: 'Source Code Pro', monospace;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── BAYBAYIN-STRIPE HEADER BAND ── */
+.stripe {
+  height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--maroon) 0px, var(--maroon) 20px,
+    var(--gold) 20px, var(--gold) 22px,
+    var(--green) 22px, var(--green) 42px,
+    var(--gold) 42px, var(--gold) 44px
+  );
+}
+
+header {
+  padding: 1rem 1.25rem 0.9rem;
+  background: var(--maroon);
+  border-bottom: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent, transparent 40px,
+    rgba(212,175,55,0.06) 40px, rgba(212,175,55,0.06) 41px
+  );
+}
+
+.logo {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  position: relative;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+}
+.logo .hi { color: var(--gold2); }
+.logo-sub {
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: rgba(255,248,231,0.55);
+  font-family: 'Source Code Pro', monospace;
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.trip-badge {
+  font-size: 0.65rem;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(212,175,55,0.3);
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  font-family: 'Source Code Pro', monospace;
+  transition: all 0.3s;
+  position: relative;
+}
+.trip-badge.active {
+  color: var(--gold2);
+  border-color: var(--gold);
+  background: rgba(212,175,55,0.15);
+}
+
+main { flex: 1; padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; }
+
+/* ── SPEED RING ── */
+.ring-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0.5rem 0 0.25rem; gap: 0.5rem;
+}
+.ring-outer {
+  width: 152px; height: 152px; border-radius: 50%;
+  border: 2px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  transition: border-color 0.4s;
+  background: radial-gradient(circle at 50% 40%, var(--surface2), var(--surface));
+}
+.ring-outer::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 1px solid rgba(212,175,55,0.2);
+}
+.ring-outer.rec {
+  border-color: var(--gold2);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
+  50% { box-shadow: 0 0 0 14px rgba(212,175,55,0.12); }
+}
+.ring-inner {
+  width: 110px; height: 110px; border-radius: 50%;
+  background: var(--maroon);
+  border: 1px solid rgba(212,175,55,0.25);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+}
+.spd-val {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 2.2rem; font-weight: 700; line-height: 1;
+  color: var(--cream);
+  transition: color 0.3s;
+}
+.spd-val.mv { color: var(--gold2); }
+.spd-unit { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.15em; }
+.status-lbl {
+  font-size: 0.68rem; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase;
+  font-family: 'Source Code Pro', monospace;
+}
+.status-lbl.rec { color: var(--gold2); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 5px; animation: blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+/* ── METRIC CARDS ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold);
+  border-radius: 6px;
+  padding: 0.85rem 0.9rem;
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.card-lbl {
+  font-size: 0.58rem; color: var(--muted);
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.card-val {
+  font-size: 1.4rem;
+  font-family: 'Libre Baskerville', serif;
+  font-weight: 700; line-height: 1.1;
+  color: var(--cream);
+}
+.card-unit { font-size: 0.58rem; color: var(--muted); }
+
+.acc-bar-wrap { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+.acc-bar { flex: 1; height: 3px; border-radius: 1px; background: rgba(212,175,55,0.15); overflow: hidden; }
+.acc-fill { height: 100%; border-radius: 1px; background: var(--gold); width: 0; transition: width 0.5s, background 0.5s; }
+.acc-grade { font-size: 0.58rem; color: var(--muted); white-space: nowrap; }
+.sig { display: flex; align-items: flex-end; gap: 2px; height: 13px; }
+.sb { width: 3px; border-radius: 1px; background: rgba(212,175,55,0.2); transition: background 0.4s; }
+.sb.on { background: var(--gold); }
+
+/* ── LOG ── */
+.log-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.log-hd {
+  padding: 0.6rem 1rem; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--maroon);
+}
+.log-cnt { font-family: 'Libre Baskerville', serif; font-weight: 700; color: var(--gold2); font-size: 0.7rem; }
+.log-scroll { max-height: 110px; overflow-y: auto; }
+.log-row {
+  padding: 0.26rem 1rem; font-size: 0.6rem; color: var(--muted);
+  border-bottom: 1px solid rgba(212,175,55,0.05);
+  display: flex; gap: 0.5rem; animation: fi 0.25s ease;
+}
+@keyframes fi { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:none; } }
+.log-row .ts { color: var(--gold); min-width: 76px; }
+.log-empty { padding: 1rem; font-size: 0.64rem; color: var(--muted); text-align: center; }
+
+/* ── SUMMARY ── */
+
+.summary-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px; padding: 1rem; display: none;
+}
+.summary-box.show { display: block; }
+.sum-title { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; }
+.sum-row {
+  display: flex; justify-content: space-between; font-size: 0.7rem;
+  padding: 0.26rem 0; border-bottom: 1px solid rgba(212,175,55,0.07);
+}
+.sum-row:last-child { border-bottom: none; }
+.sum-row span:first-child { color: var(--muted); }
+.sum-row span:last-child { color: var(--cream); font-weight: 500; }
+
+/* ── BUTTONS ── */
+.btns { display: flex; flex-direction: column; gap: 0.6rem; margin-top: auto; padding-top: 0.25rem; }
+.btn {
+  width: 100%; padding: 0.95rem; border-radius: 6px; border: none;
+  font-family: 'Source Code Pro', monospace; font-size: 0.8rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: transform 0.15s, opacity 0.2s, filter 0.2s;
+  font-weight: 500;
+}
+.btn:active { transform: scale(0.97); filter: brightness(0.9); }
+.btn:disabled { opacity: 0.3; pointer-events: none; }
+.btn-start {
+  background: var(--gold);
+  color: #1a0a0a;
+  font-weight: 700;
+  border: 2px solid var(--gold2);
+}
+.btn-stop {
+  background: var(--surface2);
+  color: var(--red);
+  border: 1px solid rgba(224,80,80,0.35);
+}
+.btn-export {
+  background: var(--green);
+  color: var(--gold2);
+  border: 1px solid var(--green2);
+}
+
+/* ── BOTTOM STRIPE ── */
+footer {
+  height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--maroon) 0px, var(--maroon) 20px,
+    var(--gold) 20px, var(--gold) 22px,
+    var(--green) 22px, var(--green) 42px,
+    var(--gold) 42px, var(--gold) 44px
+  );
+  position: sticky;
+  bottom: 0;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: calc(1.5rem + env(safe-area-inset-bottom)); left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--maroon); border: 1px solid var(--gold); border-radius: 4px;
+  padding: 0.55rem 1.2rem; font-size: 0.68rem; color: var(--cream);
+  opacity: 0; transition: all 0.28s; white-space: nowrap; pointer-events: none; z-index: 999;
+  font-family: 'Source Code Pro', monospace; letter-spacing: 0.05em;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<header>
+  <div>
+    <div class="logo">Biyahe <span class="hi">Check</span></div>
+    <div class="logo-sub">GPS Trip Tracker · PH</div>
+  </div>
+  <div class="trip-badge" id="badge">IDLE</div>
+</header>
+
+<main>
+  <div class="ring-wrap">
+    <div class="ring-outer" id="ringOuter">
+      <div class="ring-inner">
+        <div class="spd-val" id="spdVal">—</div>
+        <div class="spd-unit">km/h</div>
+      </div>
+    </div>
+    <div class="status-lbl" id="statusLbl">waiting to start</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-lbl">Distance</div>
+      <div class="card-val" id="distVal">0.000</div>
+      <div class="card-unit">km</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Duration</div>
+      <div class="card-val" id="durVal">00:00</div>
+      <div class="card-unit">elapsed</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Points</div>
+      <div class="card-val" id="ptsVal">0</div>
+      <div class="card-unit">recorded</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">GPS Accuracy</div>
+      <div class="card-val" id="accVal">—</div>
+      <div class="card-unit">meters</div>
+      <div class="acc-bar-wrap">
+        <div class="acc-bar"><div class="acc-fill" id="accFill"></div></div>
+        <div class="acc-grade" id="accGrade">—</div>
+        <div class="sig">
+          <div class="sb" id="s1" style="height:4px"></div>
+          <div class="sb" id="s2" style="height:7px"></div>
+          <div class="sb" id="s3" style="height:10px"></div>
+          <div class="sb" id="s4" style="height:13px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="log-box">
+    <div class="log-hd">
+      <span>Live GPS Log</span>
+      <span class="log-cnt" id="logCnt">0 pts</span>
+    </div>
+    <div class="log-scroll" id="logScroll">
+      <div class="log-empty" id="logEmpty">Start the trip to begin recording</div>
+    </div>
+  </div>
+
+  <div class="summary-box" id="summaryBox">
+    <div class="sum-title">Trip Summary</div>
+    <div class="sum-row"><span>Start</span><span id="sumStart">—</span></div>
+    <div class="sum-row"><span>End</span><span id="sumEnd">—</span></div>
+    <div class="sum-row"><span>Duration</span><span id="sumDur">—</span></div>
+    <div class="sum-row"><span>Distance</span><span id="sumDist">—</span></div>
+    <div class="sum-row"><span>Number of Points</span><span id="sumPts">—</span></div>
+    <div class="sum-row"><span>Avg Speed (moving)</span><span id="sumAvg">—</span></div>
+  </div>
+
+  <div class="btns">
+    <button class="btn btn-start" id="btnStart" onclick="startTrip()">▶ Start Trip</button>
+    <button class="btn btn-stop"  id="btnStop"  onclick="stopTrip()"  disabled>■ Stop Trip</button>
+    <button class="btn btn-export" id="btnExport" onclick="exportCSV()" disabled>↓ Export CSV</button>
+  </div>
+</main>
+
+<footer></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+var recording = false;
+var watchId = null;
+var rows = [];
+var tripStart = null;
+var durTick = null;
+var lastLat = null, lastLon = null;
+var totalDist = 0;
+var tripNum = 1;
+
+function haversine(la1,lo1,la2,lo2){
+  var R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
+  var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function fmtTime(d){ 
+  var h=d.getHours(), m=d.getMinutes();
+  var ampm=h>=12?'PM':'AM';
+  h=h%12; if(h===0) h=12;
+  return pad(h)+':'+pad(m)+' '+ampm;
+ }
+
+function toast(msg,ms){
+  ms=ms||2500;
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); },ms);
+}
+
+function tickDur(){
+  if(!tripStart) return;
+  var s=Math.floor((Date.now()-tripStart)/1000);
+  var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;
+  document.getElementById('durVal').textContent=
+    (h>0?pad(h)+':':'')+pad(m)+':'+pad(ss);
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function updateAcc(acc){
+  document.getElementById('accVal').textContent=acc.toFixed(1);
+  var pct=Math.max(0,Math.min(100,100-(acc/50)*100));
+  var fill=document.getElementById('accFill');
+  fill.style.width=pct+'%';
+  var grade,color,bars;
+  if(acc<=5){grade='Excellent';color='#D4AF37';bars=4;}
+  else if(acc<=10){grade='Good';color='#D4AF37';bars=3;}
+  else if(acc<=20){grade='Moderate';color='#C4956A';bars=2;}
+  else{grade='Weak';color='#E05050';bars=1;}
+  fill.style.background=color;
+  document.getElementById('accGrade').textContent=grade;
+  for(var i=1;i<=4;i++){
+    document.getElementById('s'+i).classList.toggle('on',i<=bars);
+  }
+}
+
+function onPos(pos){
+  var c=pos.coords;
+  var lat=c.latitude, lon=c.longitude;
+  var spd=c.speed!=null?c.speed*3.6:0;
+  var acc=c.accuracy, alt=c.altitude, hdg=c.heading;
+  var now=new Date();
+  var ts=new Date(now.getTime()+8*60*60*1000).toISOString().replace('Z','+08:00');
+
+  updateAcc(acc);
+  var sv=document.getElementById('spdVal');
+  sv.textContent=spd.toFixed(1);
+  sv.classList.toggle('mv',spd>1);
+
+  if(lastLat!==null){
+    var seg=haversine(lastLat,lastLon,lat,lon);
+    if(seg*1000>acc) totalDist+=seg;
+    document.getElementById('distVal').textContent=totalDist.toFixed(3);
+  }
+  lastLat=lat; lastLon=lon;
+
+  rows.push({
+    timestamp:ts,
+    latitude:lat.toFixed(8),
+    longitude:lon.toFixed(8),
+    speed_kmh:spd.toFixed(2),
+    accuracy_m:acc.toFixed(2),
+    heading_deg:hdg!=null?hdg.toFixed(1):'',
+    altitude_m:alt!=null?alt.toFixed(2):''
+  });
+
+  var n=rows.length;
+  document.getElementById('ptsVal').textContent=n;
+  document.getElementById('logCnt').textContent=n+' pts';
+
+  var ls=document.getElementById('logScroll');
+  document.getElementById('logEmpty').style.display='none';
+  var d=document.createElement('div');
+  d.className='log-row';
+  d.innerHTML='<span class="ts">'+ts.slice(11,19)+'</span>'+
+    '<span>'+lat.toFixed(5)+', '+lon.toFixed(5)+'</span>'+
+    '<span style="color:var(--gold)">'+spd.toFixed(1)+' km/h</span>';
+  ls.insertBefore(d,ls.firstChild);
+  if(ls.children.length>50) ls.removeChild(ls.lastChild);
+}
+
+function onErr(e){
+  var msg=e.code===1?'Location access denied — please enable it in Settings':
+          e.code===2?'GPS unavailable — try moving to an open area':
+          'GPS timeout — retry';
+  toast(msg,4000);
+  document.getElementById('statusLbl').textContent=msg.toLowerCase();
+}
+
+function startTrip(){
+  if(!navigator.geolocation){ toast('Device is not supported by Geolocation'); return; }
+  rows=[]; totalDist=0; lastLat=null; lastLon=null;
+  tripStart=Date.now();
+  document.getElementById('distVal').textContent='0.000';
+  document.getElementById('ptsVal').textContent='0';
+  document.getElementById('durVal').textContent='00:00';
+  document.getElementById('spdVal').textContent='—';
+  document.getElementById('spdVal').classList.remove('mv');
+  document.getElementById('logScroll').innerHTML='<div class="log-empty" id="logEmpty">Searching for GPS signal...</div>';
+  document.getElementById('logCnt').textContent='0 pts';
+  document.getElementById('summaryBox').classList.remove('show');
+  document.getElementById('btnStart').disabled=true;
+  document.getElementById('btnStop').disabled=false;
+  document.getElementById('btnExport').disabled=true;
+  document.getElementById('ringOuter').classList.add('rec');
+  var sl=document.getElementById('statusLbl');
+  sl.classList.add('rec');
+  sl.innerHTML='<span class="dot"></span>recording trip '+tripNum;
+  var b=document.getElementById('badge');
+  b.textContent='BIYAHE '+tripNum; b.classList.add('active');
+  durTick=setInterval(tickDur,1000);
+  watchId=navigator.geolocation.watchPosition(onPos,onErr,{
+    enableHighAccuracy:true, timeout:15000, maximumAge:0
+  });
+  toast('Trip recording started');
+}
+
+function stopTrip(){
+  if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  clearInterval(durTick);
+  recording=false;
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('btnExport').disabled=rows.length===0;
+  document.getElementById('ringOuter').classList.remove('rec');
+  var sl=document.getElementById('statusLbl');
+  sl.classList.remove('rec');
+  sl.textContent='finished — '+rows.length+' points';
+  var b=document.getElementById('badge');
+  b.textContent='DONE'; b.classList.remove('active');
+  document.getElementById('spdVal').textContent='—';
+  document.getElementById('spdVal').classList.remove('mv');
+
+  if(rows.length>0){
+    var t0=new Date(rows[0].timestamp), t1=new Date(rows[rows.length-1].timestamp);
+    var el=Math.floor((t1-t0)/1000);
+    var h=Math.floor(el/3600),m=Math.floor((el%3600)/60),s=el%60;
+    var dur=(h>0?h+'h ':'')+m+'m '+s+'s';
+    var movSpeeds=rows.map(function(r){return parseFloat(r.speed_kmh);}).filter(function(v){return v>2;});
+    var avgSpd=movSpeeds.length>0?(movSpeeds.reduce(function(a,b){return a+b;},0)/movSpeeds.length).toFixed(1):'0.0';
+    document.getElementById('sumStart').textContent=fmtTime(t0);
+    document.getElementById('sumEnd').textContent=fmtTime(t1);
+    document.getElementById('sumDur').textContent=dur;
+    document.getElementById('sumDist').textContent=totalDist.toFixed(3)+' km';
+    document.getElementById('sumPts').textContent=rows.length;
+    document.getElementById('sumAvg').textContent=avgSpd+' km/h';
+    document.getElementById('summaryBox').classList.add('show');
+  }
+  toast('Finished. '+rows.length+' points recorded.');
+  tripNum++;
+}
+
+function exportCSV(){
+  if(rows.length===0){toast('No data to export.');return;}
+  var hdr='timestamp,latitude,longitude,speed_kmh,accuracy_m,heading_deg,altitude_m\n';
+  var body=rows.map(function(r){
+    return [r.timestamp,r.latitude,r.longitude,r.speed_kmh,r.accuracy_m,r.heading_deg,r.altitude_m].join(',');
+  }).join('\n');
+  var csv=hdr+body;
+  var date=new Date().toISOString().slice(0,10);
+  var name='biyahecheck_trip'+(tripNum-1)+'_'+date+'.csv';
+  var blob=new Blob([csv],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download=name; a.click();
+  URL.revokeObjectURL(url);
+  toast('Saved: '+name,3000);
+}
+</script>
+</body>
+</html>
