@@ -522,10 +522,15 @@ function onPos(pos){
   sv.textContent=spd.toFixed(1);
   sv.classList.toggle('mv',spd>1);
 
-  /* Distance: only add if movement > accuracy radius AND > 3m (drift filter) */
+  /* Distance: reject poor quality points */
+  if(acc > 50){
+    lastLat=lat; lastLon=lon; // still update position but skip distance
+    return;}
+
   if(lastLat!==null){
     var seg=haversine(lastLat,lastLon,lat,lon);
-    if(seg*1000>acc && seg*1000>3) totalDist+=seg;
+    // Only count if GPS speed confirms movement AND segment > accuracy AND > 3m
+    if(spd > 2 && seg*1000 > acc && seg*1000 > 3) totalDist+=seg;
     document.getElementById('distVal').textContent=totalDist.toFixed(3);
   }
   lastLat=lat; lastLon=lon;
