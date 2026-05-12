@@ -196,6 +196,10 @@ main { flex: 1; padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: colu
 }
 .card-unit { font-size: 0.58rem; color: var(--muted); }
 
+/* idle card highlight */
+.card.idle-active { border-top-color: var(--red); }
+.card.idle-active .card-val { color: var(--red); }
+
 .acc-bar-wrap { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
 .acc-bar { flex: 1; height: 3px; border-radius: 1px; background: rgba(212,175,55,0.15); overflow: hidden; }
 .acc-fill { height: 100%; border-radius: 1px; background: var(--gold); width: 0; transition: width 0.5s, background 0.5s; }
@@ -226,10 +230,11 @@ main { flex: 1; padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: colu
 }
 @keyframes fi { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:none; } }
 .log-row .ts { color: var(--gold); min-width: 76px; }
+.log-row.is-stop { background: rgba(224,80,80,0.07); }
+.log-row.is-stop .ts { color: var(--red); }
 .log-empty { padding: 1rem; font-size: 0.64rem; color: var(--muted); text-align: center; }
 
 /* ── SUMMARY ── */
-
 .summary-box {
   background: var(--surface); border: 1px solid var(--border);
   border-left: 3px solid var(--gold);
@@ -244,6 +249,7 @@ main { flex: 1; padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: colu
 .sum-row:last-child { border-bottom: none; }
 .sum-row span:first-child { color: var(--muted); }
 .sum-row span:last-child { color: var(--cream); font-weight: 500; }
+.sum-row.highlight span:last-child { color: var(--gold2); }
 
 /* ── BUTTONS ── */
 .btns { display: flex; flex-direction: column; gap: 0.6rem; margin-top: auto; padding-top: 0.25rem; }
@@ -353,6 +359,18 @@ footer {
         </div>
       </div>
     </div>
+    <!-- Idle time card — same logic as Python: below 2 km/h for 15+ seconds -->
+    <div class="card" id="idleCard">
+      <div class="card-lbl">Idle Time</div>
+      <div class="card-val" id="idleVal">0.00</div>
+      <div class="card-unit">minutes</div>
+    </div>
+    <!-- Stop events card — same logic as Python: counts transitions into idle -->
+    <div class="card">
+      <div class="card-lbl">Stops</div>
+      <div class="card-val" id="stopVal">0</div>
+      <div class="card-unit">events (≥15s)</div>
+    </div>
   </div>
 
   <div class="log-box">
@@ -373,6 +391,9 @@ footer {
     <div class="sum-row"><span>Distance</span><span id="sumDist">—</span></div>
     <div class="sum-row"><span>Number of Points</span><span id="sumPts">—</span></div>
     <div class="sum-row"><span>Avg Speed (moving)</span><span id="sumAvg">—</span></div>
+    <!-- Added from Python: idle time and stop count in summary -->
+    <div class="sum-row highlight"><span>Idle Time</span><span id="sumIdle">—</span></div>
+    <div class="sum-row highlight"><span>Stop Events</span><span id="sumStops">—</span></div>
   </div>
 
   <div class="btns">
@@ -395,18 +416,28 @@ var lastLat = null, lastLon = null;
 var totalDist = 0;
 var tripNum = 1;
 
+/* ── IDLE & STOP DETECTION (same logic as Python notebook) ── */
+var IDLE_THRESHOLD   = 2.0;  // km/h — below this = idle (matches Python)
+var IDLE_MIN_SECONDS = 15;   // seconds before counting as a stop (matches Python)
+var idleSeconds      = 0;    // total idle time accumulated
+var stopEvents       = 0;    // number of stop events detected
+var inIdle           = false; // are we currently in an idle state?
+var currentIdle      = 0;    // seconds in current idle streak
+var lastTimestamp    = null;  // for computing dt between points
+
 function haversine(la1,lo1,la2,lo2){
   var R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
   var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-function fmtTime(d){ 
+/* AM/PM time format */
+function fmtTime(d){
   var h=d.getHours(), m=d.getMinutes();
   var ampm=h>=12?'PM':'AM';
   h=h%12; if(h===0) h=12;
   return pad(h)+':'+pad(m)+' '+ampm;
- }
+}
 
 function toast(msg,ms){
   ms=ms||2500;
@@ -441,25 +472,66 @@ function updateAcc(acc){
   }
 }
 
+/* ── IDLE DETECTION (mirrors Python Step 6 logic exactly) ── */
+function updateIdle(spd, nowTs){
+  if(lastTimestamp===null){ lastTimestamp=nowTs; return; }
+
+  // dt = seconds between this point and the last
+  var dt = (nowTs - lastTimestamp) / 1000;
+  dt = Math.min(dt, 10); // cap at 10s like Python to avoid counting long gaps
+  lastTimestamp = nowTs;
+
+  var isIdle = spd < IDLE_THRESHOLD;
+
+  if(isIdle){
+    currentIdle += dt;
+    idleSeconds += dt;
+    // Only count as a stop event when we first cross the 15s threshold
+    if(!inIdle && currentIdle >= IDLE_MIN_SECONDS){
+      inIdle = true;
+      stopEvents++;
+      document.getElementById('stopVal').textContent = stopEvents;
+      toast('Stop detected!', 2000);
+    }
+  } else {
+    inIdle = false;
+    currentIdle = Math.max(0, currentIdle - dt); // gradual decay like Python
+  }
+
+  // Update idle card
+  var idleMin = idleSeconds / 60;
+  document.getElementById('idleVal').textContent = idleMin.toFixed(2);
+
+  // Highlight idle card red when currently idle
+  document.getElementById('idleCard').classList.toggle('idle-active', isIdle);
+}
+
 function onPos(pos){
   var c=pos.coords;
   var lat=c.latitude, lon=c.longitude;
   var spd=c.speed!=null?c.speed*3.6:0;
   var acc=c.accuracy, alt=c.altitude, hdg=c.heading;
+
+  /* PHT timestamp (UTC+8) */
   var now=new Date();
   var ts=new Date(now.getTime()+8*60*60*1000).toISOString().replace('Z','+08:00');
 
   updateAcc(acc);
+
   var sv=document.getElementById('spdVal');
   sv.textContent=spd.toFixed(1);
   sv.classList.toggle('mv',spd>1);
 
+  /* Distance: only add if movement > accuracy radius AND > 3m (drift filter) */
   if(lastLat!==null){
     var seg=haversine(lastLat,lastLon,lat,lon);
-    if(seg*1000>acc) totalDist+=seg;
+    if(seg*1000>acc && seg*1000>3) totalDist+=seg;
     document.getElementById('distVal').textContent=totalDist.toFixed(3);
   }
   lastLat=lat; lastLon=lon;
+
+  /* Idle & stop detection — uses actual timestamp for accurate dt */
+  updateIdle(spd, now.getTime());
 
   rows.push({
     timestamp:ts,
@@ -478,7 +550,7 @@ function onPos(pos){
   var ls=document.getElementById('logScroll');
   document.getElementById('logEmpty').style.display='none';
   var d=document.createElement('div');
-  d.className='log-row';
+  d.className='log-row'+(spd<IDLE_THRESHOLD?' is-stop':''); // red row when idle
   d.innerHTML='<span class="ts">'+ts.slice(11,19)+'</span>'+
     '<span>'+lat.toFixed(5)+', '+lon.toFixed(5)+'</span>'+
     '<span style="color:var(--gold)">'+spd.toFixed(1)+' km/h</span>';
@@ -496,13 +568,20 @@ function onErr(e){
 
 function startTrip(){
   if(!navigator.geolocation){ toast('Device is not supported by Geolocation'); return; }
+
+  /* Reset everything including idle/stop counters */
   rows=[]; totalDist=0; lastLat=null; lastLon=null;
+  idleSeconds=0; stopEvents=0; inIdle=false; currentIdle=0; lastTimestamp=null;
   tripStart=Date.now();
+
   document.getElementById('distVal').textContent='0.000';
   document.getElementById('ptsVal').textContent='0';
   document.getElementById('durVal').textContent='00:00';
   document.getElementById('spdVal').textContent='—';
   document.getElementById('spdVal').classList.remove('mv');
+  document.getElementById('idleVal').textContent='0.00';
+  document.getElementById('stopVal').textContent='0';
+  document.getElementById('idleCard').classList.remove('idle-active');
   document.getElementById('logScroll').innerHTML='<div class="log-empty" id="logEmpty">Searching for GPS signal...</div>';
   document.getElementById('logCnt').textContent='0 pts';
   document.getElementById('summaryBox').classList.remove('show');
@@ -510,15 +589,20 @@ function startTrip(){
   document.getElementById('btnStop').disabled=false;
   document.getElementById('btnExport').disabled=true;
   document.getElementById('ringOuter').classList.add('rec');
+
   var sl=document.getElementById('statusLbl');
   sl.classList.add('rec');
   sl.innerHTML='<span class="dot"></span>recording trip '+tripNum;
+
   var b=document.getElementById('badge');
   b.textContent='BIYAHE '+tripNum; b.classList.add('active');
+
   durTick=setInterval(tickDur,1000);
+
   watchId=navigator.geolocation.watchPosition(onPos,onErr,{
     enableHighAccuracy:true, timeout:15000, maximumAge:0
   });
+
   toast('Trip recording started');
 }
 
@@ -526,13 +610,17 @@ function stopTrip(){
   if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
   clearInterval(durTick);
   recording=false;
+
   document.getElementById('btnStart').disabled=false;
   document.getElementById('btnStop').disabled=true;
   document.getElementById('btnExport').disabled=rows.length===0;
   document.getElementById('ringOuter').classList.remove('rec');
+  document.getElementById('idleCard').classList.remove('idle-active');
+
   var sl=document.getElementById('statusLbl');
   sl.classList.remove('rec');
   sl.textContent='finished — '+rows.length+' points';
+
   var b=document.getElementById('badge');
   b.textContent='DONE'; b.classList.remove('active');
   document.getElementById('spdVal').textContent='—';
@@ -543,16 +631,21 @@ function stopTrip(){
     var el=Math.floor((t1-t0)/1000);
     var h=Math.floor(el/3600),m=Math.floor((el%3600)/60),s=el%60;
     var dur=(h>0?h+'h ':'')+m+'m '+s+'s';
-    var movSpeeds=rows.map(function(r){return parseFloat(r.speed_kmh);}).filter(function(v){return v>2;});
+    var movSpeeds=rows.map(function(r){return parseFloat(r.speed_kmh);}).filter(function(v){return v>IDLE_THRESHOLD;});
     var avgSpd=movSpeeds.length>0?(movSpeeds.reduce(function(a,b){return a+b;},0)/movSpeeds.length).toFixed(1):'0.0';
+
     document.getElementById('sumStart').textContent=fmtTime(t0);
     document.getElementById('sumEnd').textContent=fmtTime(t1);
     document.getElementById('sumDur').textContent=dur;
     document.getElementById('sumDist').textContent=totalDist.toFixed(3)+' km';
     document.getElementById('sumPts').textContent=rows.length;
     document.getElementById('sumAvg').textContent=avgSpd+' km/h';
+    /* New summary rows matching Python output */
+    document.getElementById('sumIdle').textContent=(idleSeconds/60).toFixed(2)+' min';
+    document.getElementById('sumStops').textContent=stopEvents;
     document.getElementById('summaryBox').classList.add('show');
   }
+
   toast('Finished. '+rows.length+' points recorded.');
   tripNum++;
 }
