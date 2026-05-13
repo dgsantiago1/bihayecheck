@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Biyahe Check</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Code+Pro:wght@400;500&display=swap');
+
+:root {
+  --bg:       #1a0a0a;
+  --surface:  #2a1010;
+  --surface2: #3a1a10;
+  --border:   rgba(212,175,55,0.2);
+  --maroon:   #7a1a1a;
+  --maroon2:  #921f1f;
+  --gold:     #D4AF37;
+  --gold2:    #F0C040;
+  --green:    #1a4a1a;
+  --green2:   #2d6e2d;
+  --cream:    #FFF8E7;
+  --tan:      #C4956A;
+  --text:     #FFF8E7;
+  --muted:    rgba(255,248,231,0.5);
+  --red:      #E05050;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(212,175,55,0.04) 28px, rgba(212,175,55,0.04) 29px),
+    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(212,175,55,0.04) 28px, rgba(212,175,55,0.04) 29px);
+  color: var(--text);
+  font-family: 'Source Code Pro', monospace;
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.stripe {
+  height: 8px;
+  background: repeating-linear-gradient(90deg,
+    var(--maroon) 0px, var(--maroon) 20px,
+    var(--gold) 20px, var(--gold) 22px,
+    var(--green) 22px, var(--green) 42px,
+    var(--gold) 42px, var(--gold) 44px);
+}
+
+header {
+  padding: 1rem 1.25rem 0.9rem;
+  background: var(--maroon);
+  border-bottom: 2px solid var(--gold);
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; overflow: hidden;
+}
+header::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(212,175,55,0.06) 40px, rgba(212,175,55,0.06) 41px);
+}
+.logo { font-family: 'Libre Baskerville', serif; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.04em; color: var(--cream); position: relative; text-shadow: 1px 1px 0 rgba(0,0,0,0.4); }
+.logo .hi { color: var(--gold2); }
+.logo-sub { font-size: 0.55rem; letter-spacing: 0.2em; color: rgba(255,248,231,0.55); font-family: 'Source Code Pro', monospace; text-transform: uppercase; margin-top: 1px; }
+.trip-badge { font-size: 0.65rem; background: rgba(0,0,0,0.35); border: 1px solid rgba(212,175,55,0.3); padding: 4px 10px; border-radius: 4px; color: var(--muted); letter-spacing: 0.12em; transition: all 0.3s; position: relative; }
+.trip-badge.active { color: var(--gold2); border-color: var(--gold); background: rgba(212,175,55,0.15); }
+
+/* ── TABS ── */
+.tab-nav { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.tab-btn { flex: 1; padding: 0.65rem 0.5rem; font-size: 0.6rem; font-family: 'Source Code Pro', monospace; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: none; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-btn.active { color: var(--gold2); border-bottom-color: var(--gold); background: rgba(212,175,55,0.06); }
+
+main { flex: 1; display: flex; flex-direction: column; }
+.tab-panel { display: none; }
+.tab-panel.active { display: flex; flex-direction: column; flex: 1; }
+
+/* ══ TRACKER TAB ══ */
+.tracker-content { padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; }
+
+.ring-wrap { display: flex; flex-direction: column; align-items: center; padding: 0.5rem 0 0.25rem; gap: 0.5rem; }
+.ring-outer { width: 152px; height: 152px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; position: relative; transition: border-color 0.4s; background: radial-gradient(circle at 50% 40%, var(--surface2), var(--surface)); }
+.ring-outer::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; border: 1px solid rgba(212,175,55,0.2); }
+.ring-outer.rec { border-color: var(--gold2); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,0)} 50%{box-shadow:0 0 0 14px rgba(212,175,55,0.12)} }
+.ring-inner { width: 110px; height: 110px; border-radius: 50%; background: var(--maroon); border: 1px solid rgba(212,175,55,0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.spd-val { font-family: 'Libre Baskerville', serif; font-size: 2.2rem; font-weight: 700; line-height: 1; color: var(--cream); transition: color 0.3s; }
+.spd-val.mv { color: var(--gold2); }
+.spd-unit { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.15em; }
+.status-lbl { font-size: 0.68rem; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; }
+.status-lbl.rec { color: var(--gold2); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 5px; animation: blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--gold); border-radius: 6px; padding: 0.85rem 0.9rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.card-lbl { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+.card-val { font-size: 1.4rem; font-family: 'Libre Baskerville', serif; font-weight: 700; line-height: 1.1; color: var(--cream); }
+.card-unit { font-size: 0.58rem; color: var(--muted); }
+.card-sub { font-size: 0.58rem; color: var(--muted); margin-top: 2px; }
+.card-sub span { color: var(--gold2); }
+.card.idle-active { border-top-color: var(--red); }
+.card.idle-active .card-val { color: var(--red); }
+.card.acc-warn { border-top-color: var(--tan); }
+.card.acc-warn .card-val { color: var(--tan); }
+
+.acc-bar-wrap { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+.acc-bar { flex: 1; height: 3px; border-radius: 1px; background: rgba(212,175,55,0.15); overflow: hidden; }
+.acc-fill { height: 100%; border-radius: 1px; background: var(--gold); width: 0; transition: width 0.5s, background 0.5s; }
+.acc-grade { font-size: 0.58rem; color: var(--muted); white-space: nowrap; }
+.sig { display: flex; align-items: flex-end; gap: 2px; height: 13px; }
+.sb { width: 3px; border-radius: 1px; background: rgba(212,175,55,0.2); transition: background 0.4s; }
+.sb.on { background: var(--gold); }
+
+.log-box { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.log-hd { padding: 0.6rem 1rem; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--maroon); }
+.log-cnt { font-family: 'Libre Baskerville', serif; font-weight: 700; color: var(--gold2); font-size: 0.7rem; }
+.log-scroll { max-height: 110px; overflow-y: auto; }
+.log-row { padding: 0.26rem 1rem; font-size: 0.6rem; color: var(--muted); border-bottom: 1px solid rgba(212,175,55,0.05); display: flex; gap: 0.5rem; animation: fi 0.25s ease; }
+@keyframes fi { from{opacity:0;transform:translateY(-3px)} to{opacity:1;transform:none} }
+.log-row .ts { color: var(--gold); min-width: 76px; }
+.log-row.is-stop { background: rgba(224,80,80,0.07); }
+.log-row.is-stop .ts { color: var(--red); }
+.log-empty { padding: 1rem; font-size: 0.64rem; color: var(--muted); text-align: center; }
+
+.summary-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 6px; padding: 1rem; display: none; }
+.summary-box.show { display: block; }
+.sum-title { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; }
+.sum-row { display: flex; justify-content: space-between; font-size: 0.7rem; padding: 0.26rem 0; border-bottom: 1px solid rgba(212,175,55,0.07); }
+.sum-row:last-child { border-bottom: none; }
+.sum-row span:first-child { color: var(--muted); }
+.sum-row span:last-child { color: var(--cream); font-weight: 500; }
+.sum-row.highlight span:last-child { color: var(--gold2); }
+
+.btns { display: flex; flex-direction: column; gap: 0.6rem; }
+.btn { width: 100%; padding: 0.95rem; border-radius: 6px; border: none; font-family: 'Source Code Pro', monospace; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: transform 0.15s, opacity 0.2s; font-weight: 500; }
+.btn:active { transform: scale(0.97); filter: brightness(0.9); }
+.btn:disabled { opacity: 0.3; pointer-events: none; }
+.btn-start { background: var(--gold); color: #1a0a0a; font-weight: 700; border: 2px solid var(--gold2); }
+.btn-stop { background: var(--surface2); color: var(--red); border: 1px solid rgba(224,80,80,0.35); }
+.btn-export { background: var(--green); color: var(--gold2); border: 1px solid var(--green2); }
+
+/* ══ ANALYSIS TAB ══ */
+.analysis-content { padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: column; gap: 0.9rem; overflow-y: auto; flex: 1; }
+
+.upload-zone { border: 2px dashed rgba(212,175,55,0.35); border-radius: 8px; padding: 1.8rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface); position: relative; }
+.upload-zone.drag { border-color: var(--gold); background: rgba(212,175,55,0.08); }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+.upload-title { font-family: 'Libre Baskerville', serif; font-size: 0.95rem; color: var(--cream); margin-bottom: 0.25rem; }
+.upload-hint { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.07em; }
+.upload-fname { font-size: 0.65rem; color: var(--gold2); margin-top: 0.5rem; display: none; }
+
+.clean-note { background: rgba(212,175,55,0.06); border: 1px solid rgba(212,175,55,0.2); border-radius: 5px; padding: 0.6rem 0.85rem; font-size: 0.6rem; color: var(--muted); line-height: 1.5; display: none; }
+.clean-note.show { display: block; }
+.clean-note strong { color: var(--gold); }
+
+.proc-btn { width: 100%; padding: 0.95rem; border-radius: 6px; border: 2px solid var(--gold); font-family: 'Source Code Pro', monospace; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-weight: 700; background: var(--maroon2); color: var(--gold2); transition: all 0.2s; }
+.proc-btn:active { transform: scale(0.97); }
+.proc-btn:disabled { opacity: 0.35; pointer-events: none; }
+
+.an-section { background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--gold); border-radius: 6px; overflow: hidden; display: none; }
+.an-section.show { display: block; }
+.an-hd { padding: 0.65rem 1rem; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); background: var(--maroon); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.an-hd .badge { color: var(--gold2); font-family: 'Libre Baskerville', serif; font-size: 0.7rem; font-weight: 700; }
+
+.m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+.m-cell { background: var(--surface); padding: 0.8rem 0.85rem; }
+.m-cell.full { grid-column: 1 / -1; }
+.m-lbl { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.15rem; }
+.m-val { font-family: 'Libre Baskerville', serif; font-size: 1.2rem; font-weight: 700; color: var(--cream); line-height: 1.1; }
+.m-val.gold { color: var(--gold2); }
+.m-val.red { color: var(--red); }
+.m-val.sm { font-size: 0.85rem; }
+.m-unit { font-size: 0.56rem; color: var(--muted); }
+
+/* accuracy rows */
+.acc-rows { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.a-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.62rem; }
+.a-lbl { color: var(--muted); flex: 0 0 112px; }
+.a-bar { flex: 1; height: 5px; border-radius: 2px; background: rgba(212,175,55,0.1); overflow: hidden; }
+.a-fill { height: 100%; border-radius: 2px; }
+.a-val { color: var(--cream); min-width: 60px; text-align: right; }
+
+/* chart */
+.chart-wrap { padding: 0.75rem 1rem 0.5rem; }
+canvas { display: block; width: 100% !important; }
+
+/* table */
+.tbl-wrap { overflow-x: auto; max-height: 220px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.58rem; }
+th { background: rgba(212,175,55,0.1); color: var(--gold); padding: 0.4rem 0.6rem; text-align: left; letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; }
+td { padding: 0.32rem 0.6rem; color: var(--muted); border-bottom: 1px solid rgba(212,175,55,0.04); white-space: nowrap; }
+td.v { color: var(--cream); }
+td.idle { color: var(--red); }
+td.fast { color: var(--gold2); }
+
+.export-an { width: 100%; padding: 0.9rem; border-radius: 6px; border: 1px solid var(--green2); font-family: 'Source Code Pro', monospace; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: var(--green); color: var(--gold2); transition: all 0.2s; display: none; }
+.export-an.show { display: block; }
+.export-an:active { transform: scale(0.97); }
+
+footer { height: 8px; background: repeating-linear-gradient(90deg, var(--maroon) 0px, var(--maroon) 20px, var(--gold) 20px, var(--gold) 22px, var(--green) 22px, var(--green) 42px, var(--gold) 42px, var(--gold) 44px); position: sticky; bottom: 0; }
+
+.toast { position: fixed; bottom: calc(1.5rem + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(16px); background: var(--maroon); border: 1px solid var(--gold); border-radius: 4px; padding: 0.55rem 1.2rem; font-size: 0.68rem; color: var(--cream); opacity: 0; transition: all 0.28s; white-space: nowrap; pointer-events: none; z-index: 999; letter-spacing: 0.05em; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<header>
+  <div>
+    <div class="logo">Biyahe <span class="hi">Check</span></div>
+    <div class="logo-sub">GPS Trip Tracker · PH</div>
+  </div>
+  <div class="trip-badge" id="badge">IDLE</div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" id="tbTracker" onclick="switchTab('tracker')">▶ Live Track</button>
+  <button class="tab-btn" id="tbAnalysis" onclick="switchTab('analysis')">◈ Analyze CSV</button>
+</nav>
+
+<main>
+
+<!-- ══════════ TRACKER ══════════ -->
+<div class="tab-panel active" id="tab-tracker">
+<div class="tracker-content">
+
+  <div class="ring-wrap">
+    <div class="ring-outer" id="ringOuter">
+      <div class="ring-inner">
+        <div class="spd-val" id="spdVal">—</div>
+        <div class="spd-unit">km/h</div>
+      </div>
+    </div>
+    <div class="status-lbl" id="statusLbl">waiting to start</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-lbl">Distance</div>
+      <div class="card-val" id="distVal">0.000</div>
+      <div class="card-unit">km</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Duration</div>
+      <div class="card-val" id="durVal">00:00</div>
+      <div class="card-unit">elapsed</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Points</div>
+      <div class="card-val" id="ptsVal">0</div>
+      <div class="card-unit">recorded</div>
+      <div class="card-sub">Max: <span id="maxSpdVal">0.0</span> km/h</div>
+    </div>
+    <div class="card" id="accCard">
+      <div class="card-lbl">GPS Accuracy</div>
+      <div class="card-val" id="accVal">—</div>
+      <div class="card-unit">meters</div>
+      <div class="acc-bar-wrap">
+        <div class="acc-bar"><div class="acc-fill" id="accFill"></div></div>
+        <div class="acc-grade" id="accGrade">—</div>
+        <div class="sig">
+          <div class="sb" id="s1" style="height:4px"></div>
+          <div class="sb" id="s2" style="height:7px"></div>
+          <div class="sb" id="s3" style="height:10px"></div>
+          <div class="sb" id="s4" style="height:13px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="idleCard">
+      <div class="card-lbl">Idle Time</div>
+      <div class="card-val" id="idleVal">0.00</div>
+      <div class="card-unit">minutes</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Stops</div>
+      <div class="card-val" id="stopVal">0</div>
+      <div class="card-unit">events (≥15s)</div>
+    </div>
+  </div>
+
+  <div class="log-box">
+    <div class="log-hd">
+      <span>Live GPS Log</span>
+      <span class="log-cnt" id="logCnt">0 pts</span>
+    </div>
+    <div class="log-scroll" id="logScroll">
+      <div class="log-empty" id="logEmpty">Start the trip to begin recording</div>
+    </div>
+  </div>
+
+  <div class="summary-box" id="summaryBox">
+    <div class="sum-title">Trip Summary</div>
+    <div class="sum-row"><span>Start</span><span id="sumStart">—</span></div>
+    <div class="sum-row"><span>End</span><span id="sumEnd">—</span></div>
+    <div class="sum-row"><span>Duration</span><span id="sumDur">—</span></div>
+    <div class="sum-row"><span>Distance</span><span id="sumDist">—</span></div>
+    <div class="sum-row"><span>Number of Points</span><span id="sumPts">—</span></div>
+    <div class="sum-row"><span>Avg Speed (moving)</span><span id="sumAvg">—</span></div>
+    <div class="sum-row"><span>Max Speed</span><span id="sumMax">—</span></div>
+    <div class="sum-row highlight"><span>Idle Time</span><span id="sumIdle">—</span></div>
+    <div class="sum-row highlight"><span>Stop Events</span><span id="sumStops">—</span></div>
+  </div>
+
+  <div class="btns">
+    <button class="btn btn-start" id="btnStart" onclick="startTrip()">▶ Start Trip</button>
+    <button class="btn btn-stop"  id="btnStop"  onclick="stopTrip()"  disabled>■ Stop Trip</button>
+    <button class="btn btn-export" id="btnExport" onclick="exportCSV()" disabled>↓ Export CSV</button>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════ ANALYSIS ══════════ -->
+<div class="tab-panel" id="tab-analysis">
+<div class="analysis-content">
+
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="csvInput" accept=".csv" onchange="handleFile(this.files[0])">
+    <div class="upload-icon">📂</div>
+    <div class="upload-title">Load Trip CSV</div>
+    <div class="upload-hint">CSV exported from Biyahe Check · RouteTrack PH</div>
+    <div class="upload-fname" id="uploadFname"></div>
+  </div>
+
+  <div class="clean-note" id="cleanNote"></div>
+
+  <button class="proc-btn" id="procBtn" onclick="analyzeData()" disabled>◈ Analyze Trip</button>
+
+  <div class="an-section" id="secSummary">
+    <div class="an-hd"><span>Full Day Summary</span><span class="badge" id="sumDate">—</span></div>
+    <div class="m-grid">
+      <div class="m-cell"><div class="m-lbl">Total Distance</div><div class="m-val gold" id="an-dist">—</div><div class="m-unit">km</div></div>
+      <div class="m-cell"><div class="m-lbl">Duration</div><div class="m-val" id="an-dur">—</div><div class="m-unit">elapsed</div></div>
+      <div class="m-cell"><div class="m-lbl">Avg Speed (moving)</div><div class="m-val" id="an-avgmov">—</div><div class="m-unit">km/h</div></div>
+      <div class="m-cell"><div class="m-lbl">Max Speed</div><div class="m-val gold" id="an-max">—</div><div class="m-unit">km/h</div></div>
+      <div class="m-cell"><div class="m-lbl">Idle Time</div><div class="m-val red" id="an-idle">—</div><div class="m-unit">minutes</div></div>
+      <div class="m-cell"><div class="m-lbl">Stop Events</div><div class="m-val red" id="an-stops">—</div><div class="m-unit">≥15s idle</div></div>
+      <div class="m-cell"><div class="m-lbl">GPS Points</div><div class="m-val" id="an-pts">—</div><div class="m-unit">clean readings</div></div>
+      <div class="m-cell"><div class="m-lbl">Mean Accuracy</div><div class="m-val" id="an-acc">—</div><div class="m-unit">meters</div></div>
+      <div class="m-cell full"><div class="m-lbl">Trip Window</div><div class="m-val sm" id="an-window">—</div></div>
+    </div>
+  </div>
+
+  <div class="an-section" id="secChart">
+    <div class="an-hd"><span>Speed Over Time</span><span class="badge" id="chartBadge">—</span></div>
+    <div class="chart-wrap"><canvas id="speedChart" height="120"></canvas></div>
+  </div>
+
+  <div class="an-section" id="secAcc">
+    <div class="an-hd"><span>GPS Accuracy Breakdown</span></div>
+    <div class="acc-rows" id="accRows"></div>
+  </div>
+
+  <div class="an-section" id="secTable">
+    <div class="an-hd"><span>Point-by-Point Data</span><span class="badge" id="tblBadge">—</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Time</th><th>Lat</th><th>Lon</th>
+          <th>Spd (km/h)</th><th>Acc (m)</th>
+          <th>Seg (km)</th><th>Cum (km)</th><th>State</th>
+        </tr></thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <button class="export-an" id="exportAnBtn" onclick="exportProcessed()">↓ Export Processed CSV</button>
+
+</div>
+</div>
+
+</main>
+
+<footer></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── UTILS ── */
+function hav(la1,lo1,la2,lo2){
+  var R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
+  var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function pad(n){return String(n).padStart(2,'0');}
+function fmtTime(d){
+  var h=d.getHours(),m=d.getMinutes(),s=d.getSeconds(),ap=h>=12?'PM':'AM';
+  h=h%12;if(h===0)h=12;
+  return pad(h)+':'+pad(m)+':'+pad(s)+' '+ap;
+}
+function toast(msg,ms){
+  ms=ms||2500;
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},ms);
+}
+function dlBlob(content,type,name){
+  var b=new Blob([content],{type:type}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
+}
+
+/* ── TAB SWITCH ── */
+function switchTab(name){
+  ['tracker','analysis'].forEach(function(n){
+    document.getElementById('tab-'+n).classList.toggle('active',n===name);
+  });
+  document.getElementById('tbTracker').classList.toggle('active',name==='tracker');
+  document.getElementById('tbAnalysis').classList.toggle('active',name==='analysis');
+}
+
+/* ════════════════════════════════════════
+   LIVE TRACKER
+════════════════════════════════════════ */
+var rec=false,wid=null,rows=[],tStart=null,dTick=null;
+var lLat=null,lLon=null,totDist=0,tripN=1,maxSpd=0;
+var IDLE_T=2.0,IDLE_MIN=15,idleSec=0,stopEvts=0,inIdle=false,currIdle=0,lTS=null;
+
+function updAcc(acc){
+  var pct=Math.max(0,Math.min(100,100-(acc/50)*100));
+  var f=document.getElementById('accFill');
+  f.style.width=pct+'%';
+  var grade,col,bars;
+  if(acc<=5){grade='Excellent';col='#D4AF37';bars=4;}
+  else if(acc<=10){grade='Good';col='#D4AF37';bars=3;}
+  else if(acc<=20){grade='Moderate';col='#C4956A';bars=2;}
+  else{grade='Weak';col='#E05050';bars=1;}
+  f.style.background=col;
+  document.getElementById('accVal').textContent=acc.toFixed(1);
+  document.getElementById('accGrade').textContent=grade;
+  document.getElementById('accCard').classList.toggle('acc-warn',acc>20);
+  for(var i=1;i<=4;i++)document.getElementById('s'+i).classList.toggle('on',i<=bars);
+}
+
+function updIdle(spd,now){
+  if(lTS===null){lTS=now;return;}
+  var dt=Math.min((now-lTS)/1000,10);lTS=now;
+  var isI=spd<IDLE_T;
+  if(isI){
+    currIdle+=dt;idleSec+=dt;
+    if(!inIdle&&currIdle>=IDLE_MIN){inIdle=true;stopEvts++;document.getElementById('stopVal').textContent=stopEvts;toast('Stop detected!',2000);}
+  }else{inIdle=false;currIdle=Math.max(0,currIdle-dt);}
+  document.getElementById('idleVal').textContent=(idleSec/60).toFixed(2);
+  document.getElementById('idleCard').classList.toggle('idle-active',isI);
+}
+
+function onPos(pos){
+  var c=pos.coords,lat=c.latitude,lon=c.longitude;
+  var spd=c.speed!=null?c.speed*3.6:0,acc=c.accuracy,alt=c.altitude,hdg=c.heading;
+  var now=new Date();
+  var ts=new Date(now.getTime()+8*3600000).toISOString().replace('Z','+08:00');
+  updAcc(acc);
+  if(spd>maxSpd){maxSpd=spd;document.getElementById('maxSpdVal').textContent=maxSpd.toFixed(1);}
+  var sv=document.getElementById('spdVal');sv.textContent=spd.toFixed(1);sv.classList.toggle('mv',spd>1);
+  if(lLat!==null){var seg=hav(lLat,lLon,lat,lon);if(seg*1000>acc)totDist+=seg;document.getElementById('distVal').textContent=totDist.toFixed(3);}
+  lLat=lat;lLon=lon;
+  updIdle(spd,now.getTime());
+  rows.push({timestamp:ts,latitude:lat.toFixed(8),longitude:lon.toFixed(8),speed_kmh:spd.toFixed(2),accuracy_m:acc.toFixed(2),heading_deg:hdg!=null?hdg.toFixed(1):'',altitude_m:alt!=null?alt.toFixed(2):''});
+  var n=rows.length;
+  document.getElementById('ptsVal').textContent=n;
+  document.getElementById('logCnt').textContent=n+' pts';
+  var ls=document.getElementById('logScroll');
+  document.getElementById('logEmpty').style.display='none';
+  var d=document.createElement('div');
+  d.className='log-row'+(spd<IDLE_T?' is-stop':'');
+  d.innerHTML='<span class="ts">'+ts.slice(11,19)+'</span><span>'+lat.toFixed(5)+', '+lon.toFixed(5)+'</span><span style="color:var(--gold)">'+spd.toFixed(1)+' km/h</span>';
+  ls.insertBefore(d,ls.firstChild);
+  if(ls.children.length>50)ls.removeChild(ls.lastChild);
+}
+
+function onErr(e){
+  var m=e.code===1?'Location denied — enable in Settings':e.code===2?'GPS unavailable':'GPS timeout';
+  toast(m,4000);document.getElementById('statusLbl').textContent=m.toLowerCase();
+}
+
+function tickDur(){
+  if(!tStart)return;
+  var s=Math.floor((Date.now()-tStart)/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;
+  document.getElementById('durVal').textContent=(h>0?pad(h)+':':'')+pad(m)+':'+pad(ss);
+}
+
+function startTrip(){
+  if(!navigator.geolocation){toast('Geolocation not supported');return;}
+  rows=[];totDist=0;lLat=null;lLon=null;maxSpd=0;
+  idleSec=0;stopEvts=0;inIdle=false;currIdle=0;lTS=null;tStart=Date.now();
+  ['distVal','ptsVal','durVal'].forEach(function(id,i){document.getElementById(id).textContent=['0.000','0','00:00'][i];});
+  document.getElementById('spdVal').textContent='—';document.getElementById('spdVal').classList.remove('mv');
+  document.getElementById('idleVal').textContent='0.00';document.getElementById('stopVal').textContent='0';
+  document.getElementById('maxSpdVal').textContent='0.0';
+  document.getElementById('idleCard').classList.remove('idle-active');
+  document.getElementById('accCard').classList.remove('acc-warn');
+  document.getElementById('logScroll').innerHTML='<div class="log-empty" id="logEmpty">Acquiring GPS signal...</div>';
+  document.getElementById('logCnt').textContent='0 pts';
+  document.getElementById('summaryBox').classList.remove('show');
+  document.getElementById('btnStart').disabled=true;
+  document.getElementById('btnStop').disabled=false;
+  document.getElementById('btnExport').disabled=true;
+  document.getElementById('ringOuter').classList.add('rec');
+  var sl=document.getElementById('statusLbl');sl.classList.add('rec');
+  sl.innerHTML='<span class="dot"></span>recording trip '+tripN;
+  var b=document.getElementById('badge');b.textContent='BIYAHE '+tripN;b.classList.add('active');
+  dTick=setInterval(tickDur,1000);
+  wid=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+  toast('Trip recording started');
+}
+
+function stopTrip(){
+  if(wid!==null){navigator.geolocation.clearWatch(wid);wid=null;}
+  clearInterval(dTick);rec=false;
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('btnExport').disabled=rows.length===0;
+  document.getElementById('ringOuter').classList.remove('rec');
+  document.getElementById('idleCard').classList.remove('idle-active');
+  var sl=document.getElementById('statusLbl');sl.classList.remove('rec');sl.textContent='finished — '+rows.length+' points';
+  var b=document.getElementById('badge');b.textContent='DONE';b.classList.remove('active');
+  document.getElementById('spdVal').textContent='—';document.getElementById('spdVal').classList.remove('mv');
+  if(rows.length>0){
+    var t0=new Date(rows[0].timestamp),t1=new Date(rows[rows.length-1].timestamp);
+    var el=Math.floor((t1-t0)/1000),h=Math.floor(el/3600),m=Math.floor((el%3600)/60),s=el%60;
+    var dur=(h>0?h+'h ':'')+m+'m '+s+'s';
+    var ms=rows.map(function(r){return parseFloat(r.speed_kmh);}).filter(function(v){return v>IDLE_T;});
+    var avg=ms.length>0?(ms.reduce(function(a,b){return a+b;},0)/ms.length).toFixed(1):'0.0';
+    document.getElementById('sumStart').textContent=fmtTime(t0);
+    document.getElementById('sumEnd').textContent=fmtTime(t1);
+    document.getElementById('sumDur').textContent=dur;
+    document.getElementById('sumDist').textContent=totDist.toFixed(3)+' km';
+    document.getElementById('sumPts').textContent=rows.length;
+    document.getElementById('sumAvg').textContent=avg+' km/h';
+    document.getElementById('sumMax').textContent=maxSpd.toFixed(1)+' km/h';
+    document.getElementById('sumIdle').textContent=(idleSec/60).toFixed(2)+' min';
+    document.getElementById('sumStops').textContent=stopEvts;
+    document.getElementById('summaryBox').classList.add('show');
+  }
+  toast('Finished. '+rows.length+' points recorded.');tripN++;
+}
+
+function exportCSV(){
+  if(rows.length===0){toast('No data to export.');return;}
+  var hdr='timestamp,latitude,longitude,speed_kmh,accuracy_m,heading_deg,altitude_m\n';
+  var body=rows.map(function(r){return[r.timestamp,r.latitude,r.longitude,r.speed_kmh,r.accuracy_m,r.heading_deg,r.altitude_m].join(',');}).join('\n');
+  var name='biyahecheck_trip'+(tripN-1)+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  dlBlob(hdr+body,'text/csv',name);toast('Saved: '+name,3000);
+}
+
+/* ════════════════════════════════════════
+   ANALYSIS ENGINE — mirrors Python notebook
+   Steps 2–8 of RouteTrack PH / GE 168 logic
+════════════════════════════════════════ */
+var anRaw=[],anClean=[],anProc=[];
+
+/* drag-drop */
+var uz=document.getElementById('uploadZone');
+uz.addEventListener('dragover',function(e){e.preventDefault();uz.classList.add('drag');});
+uz.addEventListener('dragleave',function(){uz.classList.remove('drag');});
+uz.addEventListener('drop',function(e){e.preventDefault();uz.classList.remove('drag');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+
+function handleFile(file){
+  if(!file)return;
+  document.getElementById('uploadFname').textContent=file.name;
+  document.getElementById('uploadFname').style.display='block';
+  var r=new FileReader();
+  r.onload=function(e){
+    anRaw=parseCSV(e.target.result);
+    if(anRaw.length===0){toast('Could not parse CSV',3000);return;}
+    document.getElementById('procBtn').disabled=false;
+    ['secSummary','secChart','secAcc','secTable'].forEach(function(id){document.getElementById(id).classList.remove('show');});
+    document.getElementById('exportAnBtn').classList.remove('show');
+    document.getElementById('cleanNote').classList.remove('show');
+    toast('Loaded '+anRaw.length+' rows — tap Analyze',3000);
+  };
+  r.readAsText(file);
+}
+
+function parseCSV(text){
+  var lines=text.trim().split('\n');if(lines.length<2)return[];
+  var hdr=lines[0].split(',').map(function(h){return h.trim().replace(/^"|"$/g,'');});
+  var out=[];
+  for(var i=1;i<lines.length;i++){
+    var v=lines[i].split(',');if(v.length<2)continue;
+    var o={};hdr.forEach(function(h,j){o[h]=(v[j]||'').trim().replace(/^"|"$/g,'');});out.push(o);
+  }
+  return out;
+}
+
+function analyzeData(){
+  if(anRaw.length===0)return;
+
+  /* Step 2 — parse + sort */
+  var df=anRaw.map(function(r){
+    return{ts:new Date(r.timestamp),lat:parseFloat(r.latitude),lon:parseFloat(r.longitude),
+      spd:parseFloat(r.speed_kmh)||0,acc:parseFloat(r.accuracy_m)||99,
+      hdg:r.heading_deg?parseFloat(r.heading_deg)||null:null,
+      alt:r.altitude_m?parseFloat(r.altitude_m)||null:null};
+  }).filter(function(r){return!isNaN(r.ts.getTime())&&!isNaN(r.lat)&&!isNaN(r.lon);});
+  df.sort(function(a,b){return a.ts-b.ts;});
+  var orig=df.length;
+
+  /* Step 3 — clean */
+  var seen={};
+  df=df.filter(function(r){var k=r.ts.getTime();if(seen[k])return false;seen[k]=true;return true;});
+  df=df.filter(function(r){return r.spd<=150;});          // remove GPS spikes
+  df=df.filter(function(r){return r.acc<=50;});           // remove poor accuracy
+  // fill zero speeds from coordinates
+  for(var i=1;i<df.length;i++){
+    if(df[i].spd===0){
+      var dt2=(df[i].ts-df[i-1].ts)/1000;
+      if(dt2>0){var d2=hav(df[i-1].lat,df[i-1].lon,df[i].lat,df[i].lon);df[i].spd=Math.max(0,(d2/dt2)*3600);}
+    }
+  }
+  var removed=orig-df.length;
+
+  /* Step 4 — Haversine distances */
+  var segKm=[0],cumKm=0,cumArr=[0];
+  for(var i=1;i<df.length;i++){
+    var seg=hav(df[i-1].lat,df[i-1].lon,df[i].lat,df[i].lon);
+    segKm.push(seg);
+    if(seg*1000>df[i].acc)cumKm+=seg;
+    cumArr.push(cumKm);
+  }
+
+  /* Step 5 — speed metrics */
+  var IT=2.0;
+  var movSpds=df.filter(function(r){return r.spd>IT;}).map(function(r){return r.spd;});
+  var avgMov=movSpds.length>0?movSpds.reduce(function(a,b){return a+b;},0)/movSpds.length:0;
+  var maxS=Math.max.apply(null,df.map(function(r){return r.spd;}));
+
+  /* Step 6 — idle & stops (exact Python logic) */
+  var IM=15,idleS=0,stpN=0,inI=false,cI=0,stpIdx=[];
+  var isIdle=df.map(function(r){return r.spd<IT;});
+  for(var i=1;i<df.length;i++){
+    var dt=Math.min((df[i].ts-df[i-1].ts)/1000,10);
+    if(isIdle[i]){
+      cI+=dt;idleS+=dt;
+      if(!inI&&cI>=IM){inI=true;stpN++;stpIdx.push(i);}
+    }else{inI=false;cI=Math.max(0,cI-dt);}
+  }
+  var idleMin=idleS/60;
+
+  /* Step 7 — duration */
+  var t0=df[0].ts,t1=df[df.length-1].ts;
+  var totS=(t1-t0)/1000;
+  var hh=Math.floor(totS/3600),mm=Math.floor((totS%3600)/60),ss=Math.floor(totS%60);
+  var durStr=(hh>0?hh+'h ':'')+mm+'m '+ss+'s';
+
+  /* Step 8 — accuracy */
+  var accs=df.map(function(r){return r.acc;});
+  var meanAcc=accs.reduce(function(a,b){return a+b;},0)/accs.length;
+  var grades={'Excellent (≤5m)':accs.filter(function(a){return a<=5;}).length,'Good (5–10m)':accs.filter(function(a){return a>5&&a<=10;}).length,'Fair (10–20m)':accs.filter(function(a){return a>10&&a<=20;}).length,'Poor (>20m)':accs.filter(function(a){return a>20;}).length};
+  var gColors={'Excellent (≤5m)':'#D4AF37','Good (5–10m)':'#D4AF37','Fair (10–20m)':'#C4956A','Poor (>20m)':'#E05050'};
+
+  /* store processed */
+  anProc=df.map(function(r,i){return{timestamp:r.ts.toISOString(),latitude:r.lat,longitude:r.lon,speed_kmh:r.spd,accuracy_m:r.acc,heading_deg:r.hdg,altitude_m:r.alt,segment_km:segKm[i],cumulative_km:cumArr[i],is_idle:isIdle[i]};});
+
+  /* ── Render ── */
+  var dateStr=t0.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('sumDate').textContent=dateStr;
+  document.getElementById('an-dist').textContent=cumKm.toFixed(3);
+  document.getElementById('an-dur').textContent=durStr;
+  document.getElementById('an-avgmov').textContent=avgMov.toFixed(1)+' km/h';
+  document.getElementById('an-max').textContent=maxS.toFixed(1)+' km/h';
+  document.getElementById('an-idle').textContent=idleMin.toFixed(2)+' min';
+  document.getElementById('an-stops').textContent=stpN;
+  document.getElementById('an-pts').textContent=df.length;
+  document.getElementById('an-acc').textContent=meanAcc.toFixed(1)+' m';
+  document.getElementById('an-window').textContent=fmtTime(t0)+' → '+fmtTime(t1);
+
+  /* clean note */
+  if(removed>0){
+    var cn=document.getElementById('cleanNote');
+    cn.innerHTML='<strong>Data Cleaning:</strong> Removed <strong>'+removed+'</strong> noisy point'+(removed!==1?'s':'')+' (duplicates, spikes >150 km/h, accuracy >50 m). Analysing <strong>'+df.length+'</strong> clean points.';
+    cn.classList.add('show');
+  }
+
+  /* accuracy breakdown */
+  var ar=document.getElementById('accRows');ar.innerHTML='';
+  Object.keys(grades).forEach(function(lbl){
+    var cnt=grades[lbl],pct=df.length?cnt/df.length*100:0;
+    var row=document.createElement('div');row.className='a-row';
+    row.innerHTML='<span class="a-lbl">'+lbl+'</span><div class="a-bar"><div class="a-fill" style="width:'+pct.toFixed(1)+'%;background:'+gColors[lbl]+'"></div></div><span class="a-val">'+cnt+' ('+pct.toFixed(0)+'%)</span>';
+    ar.appendChild(row);
+  });
+
+  /* speed chart */
+  renderChart(df,stpIdx,IT);
+  document.getElementById('chartBadge').textContent=stpN+' stop'+(stpN!==1?'s':'')+' · max '+maxS.toFixed(1)+' km/h';
+
+  /* data table (first 200 rows) */
+  var tb=document.getElementById('dataBody');tb.innerHTML='';
+  var mx=Math.min(df.length,200);
+  for(var i=0;i<mx;i++){
+    var r=df[i],tr=document.createElement('tr');
+    tr.innerHTML='<td class="v">'+r.ts.toTimeString().slice(0,8)+'</td>'+
+      '<td>'+r.lat.toFixed(5)+'</td><td>'+r.lon.toFixed(5)+'</td>'+
+      '<td class="v'+(r.spd>30?' fast':'')+'">'+r.spd.toFixed(1)+'</td>'+
+      '<td>'+r.acc.toFixed(1)+'</td>'+
+      '<td>'+segKm[i].toFixed(4)+'</td><td class="v">'+cumArr[i].toFixed(4)+'</td>'+
+      '<td class="'+(isIdle[i]?'idle':'v')+'">'+( isIdle[i]?'IDLE':'MOVING')+'</td>';
+    tb.appendChild(tr);
+  }
+  document.getElementById('tblBadge').textContent=(df.length>200?'first 200 of ':'')+df.length+' pts';
+
+  ['secSummary','secChart','secAcc','secTable'].forEach(function(id){document.getElementById(id).classList.add('show');});
+  document.getElementById('exportAnBtn').classList.add('show');
+  toast('Analysis complete — '+df.length+' clean points',3000);
+}
+
+function renderChart(df,stpIdx,IT){
+  var canvas=document.getElementById('speedChart');
+  var W=canvas.offsetWidth||320,H=120;
+  canvas.width=W;canvas.height=H;
+  var ctx=canvas.getContext('2d');
+  var spds=df.map(function(r){return r.spd;});
+  var maxS=Math.max.apply(null,spds)||1,n=spds.length;
+
+  ctx.fillStyle='#2a1010';ctx.fillRect(0,0,W,H);
+
+  /* idle threshold line */
+  var yIT=H-(IT/maxS)*(H-6);
+  ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(224,80,80,0.4)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,yIT);ctx.lineTo(W,yIT);ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* fill */
+  ctx.beginPath();ctx.moveTo(0,H);
+  for(var i=0;i<n;i++){var x=i/(n-1||1)*W,y=H-(spds[i]/maxS)*(H-6);if(i===0)ctx.lineTo(x,y);else ctx.lineTo(x,y);}
+  ctx.lineTo(W,H);ctx.closePath();
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(212,175,55,0.5)');g.addColorStop(1,'rgba(212,175,55,0.03)');
+  ctx.fillStyle=g;ctx.fill();
+
+  /* line */
+  ctx.beginPath();ctx.strokeStyle='#D4AF37';ctx.lineWidth=1.5;
+  for(var i=0;i<n;i++){var x=i/(n-1||1)*W,y=H-(spds[i]/maxS)*(H-6);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+  ctx.stroke();
+
+  /* stop markers */
+  stpIdx.forEach(function(idx){
+    var x=idx/(n-1||1)*W,y=H-(spds[idx]/maxS)*(H-6);
+    ctx.fillStyle='#E05050';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+  });
+
+  /* labels */
+  ctx.font='9px Source Code Pro,monospace';
+  ctx.fillStyle='rgba(212,175,55,0.65)';ctx.fillText(maxS.toFixed(0)+' km/h',4,12);
+  ctx.fillStyle='rgba(224,80,80,0.55)';ctx.fillText(IT+' km/h (idle)',4,yIT-3);
+}
+
+function exportProcessed(){
+  if(anProc.length===0){toast('No data.');return;}
+  var fields=['timestamp','latitude','longitude','speed_kmh','accuracy_m','heading_deg','altitude_m','segment_km','cumulative_km','is_idle'];
+  var hdr=fields.join(',')+'\n';
+  var body=anProc.map(function(r){return fields.map(function(f){var v=r[f];return v!=null?v:'';}).join(',');}).join('\n');
+  dlBlob(hdr+body,'text/csv','biyahecheck_processed_'+new Date().toISOString().slice(0,10)+'.csv');
+  toast('Exported processed CSV',3000);
+}
+</script>
+</body>
+</html>
