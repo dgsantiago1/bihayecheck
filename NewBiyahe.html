@@ -624,7 +624,11 @@ function onPos(pos){
       accuracy_m:acc.toFixed(2),
       heading_deg:hdg!=null?hdg.toFixed(1):'',
       altitude_m:alt!=null?alt.toFixed(2):'',
-      is_idle:isIdle
+      is_idle:isIdle,
+
+      cumulative_distance_km: totalDist.toFixed(3),
+      total_idle_seconds: Math.round(totalIdleSeconds),
+      stop_count: stopEvents
     });
   }
 
@@ -736,9 +740,9 @@ function stopTrip(){
 
 function exportCSV(){
   if(rows.length===0){toast('No data to export.');return;}
-  var hdr='timestamp,latitude,longitude,speed_kmh,accuracy_m,heading_deg,altitude_m,is_idle\n';
+  var hdr='timestamp,latitude,longitude,speed_kmh,accuracy_m,heading_deg,altitude_m,is_idle,cumulative_distance_km,total_idle_seconds,stop_count\n';
   var body=rows.map(function(r){
-    return [r.timestamp,r.latitude,r.longitude,r.speed_kmh,r.accuracy_m,r.heading_deg,r.altitude_m,r.is_idle].join(',');
+    return [r.timestamp,r.latitude,r.longitude,r.speed_kmh,r.accuracy_m,r.heading_deg,r.altitude_m,r.is_idle,r.cumulative_distance_km,r.total_idle_seconds,r.stop_count].join(',');
   }).join('\n');
   var csv=hdr+body;
   var date=new Date().toISOString().slice(0,10);
