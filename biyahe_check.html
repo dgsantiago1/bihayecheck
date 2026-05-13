@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Biyahe Check</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Code+Pro:wght@400;500&display=swap');
 
@@ -68,16 +69,9 @@ header::before {
 .trip-badge { font-size: 0.65rem; background: rgba(0,0,0,0.35); border: 1px solid rgba(212,175,55,0.3); padding: 4px 10px; border-radius: 4px; color: var(--muted); letter-spacing: 0.12em; transition: all 0.3s; position: relative; }
 .trip-badge.active { color: var(--gold2); border-color: var(--gold); background: rgba(212,175,55,0.15); }
 
-/* ── TABS ── */
-.tab-nav { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-.tab-btn { flex: 1; padding: 0.65rem 0.5rem; font-size: 0.6rem; font-family: 'Source Code Pro', monospace; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: none; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
-.tab-btn.active { color: var(--gold2); border-bottom-color: var(--gold); background: rgba(212,175,55,0.06); }
+main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
-main { flex: 1; display: flex; flex-direction: column; }
-.tab-panel { display: none; }
-.tab-panel.active { display: flex; flex-direction: column; flex: 1; }
-
-/* ══ TRACKER TAB ══ */
+/* ══ TRACKER ══ */
 .tracker-content { padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; }
 
 .ring-wrap { display: flex; flex-direction: column; align-items: center; padding: 0.5rem 0 0.25rem; gap: 0.5rem; }
@@ -125,6 +119,7 @@ main { flex: 1; display: flex; flex-direction: column; }
 .log-row.is-stop .ts { color: var(--red); }
 .log-empty { padding: 1rem; font-size: 0.64rem; color: var(--muted); text-align: center; }
 
+/* ── summary box (quick trip summary after stop) ── */
 .summary-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 6px; padding: 1rem; display: none; }
 .summary-box.show { display: block; }
 .sum-title { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; }
@@ -142,24 +137,22 @@ main { flex: 1; display: flex; flex-direction: column; }
 .btn-stop { background: var(--surface2); color: var(--red); border: 1px solid rgba(224,80,80,0.35); }
 .btn-export { background: var(--green); color: var(--gold2); border: 1px solid var(--green2); }
 
-/* ══ ANALYSIS TAB ══ */
-.analysis-content { padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: column; gap: 0.9rem; overflow-y: auto; flex: 1; }
+/* ══ INLINE ANALYSIS ══ */
+.analysis-inline { display: none; flex-direction: column; gap: 0.9rem; }
+.analysis-inline.show { display: flex; }
 
-.upload-zone { border: 2px dashed rgba(212,175,55,0.35); border-radius: 8px; padding: 1.8rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface); position: relative; }
-.upload-zone.drag { border-color: var(--gold); background: rgba(212,175,55,0.08); }
-.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.upload-icon { font-size: 2rem; margin-bottom: 0.4rem; }
-.upload-title { font-family: 'Libre Baskerville', serif; font-size: 0.95rem; color: var(--cream); margin-bottom: 0.25rem; }
-.upload-hint { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.07em; }
-.upload-fname { font-size: 0.65rem; color: var(--gold2); margin-top: 0.5rem; display: none; }
+.an-divider { display: flex; align-items: center; gap: 0.7rem; }
+.an-divider::before,.an-divider::after { content:''; flex:1; height:1px; background: var(--border); }
+.an-divider span { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
+
+.analyzing-spinner { display: none; align-items: center; gap: 0.6rem; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; padding: 0.5rem 0; }
+.analyzing-spinner.show { display: flex; }
+.spin { width: 14px; height: 14px; border: 2px solid rgba(212,175,55,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
 
 .clean-note { background: rgba(212,175,55,0.06); border: 1px solid rgba(212,175,55,0.2); border-radius: 5px; padding: 0.6rem 0.85rem; font-size: 0.6rem; color: var(--muted); line-height: 1.5; display: none; }
 .clean-note.show { display: block; }
 .clean-note strong { color: var(--gold); }
-
-.proc-btn { width: 100%; padding: 0.95rem; border-radius: 6px; border: 2px solid var(--gold); font-family: 'Source Code Pro', monospace; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-weight: 700; background: var(--maroon2); color: var(--gold2); transition: all 0.2s; }
-.proc-btn:active { transform: scale(0.97); }
-.proc-btn:disabled { opacity: 0.35; pointer-events: none; }
 
 .an-section { background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--gold); border-radius: 6px; overflow: hidden; display: none; }
 .an-section.show { display: block; }
@@ -176,7 +169,6 @@ main { flex: 1; display: flex; flex-direction: column; }
 .m-val.sm { font-size: 0.85rem; }
 .m-unit { font-size: 0.56rem; color: var(--muted); }
 
-/* accuracy rows */
 .acc-rows { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.45rem; }
 .a-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.62rem; }
 .a-lbl { color: var(--muted); flex: 0 0 112px; }
@@ -184,11 +176,9 @@ main { flex: 1; display: flex; flex-direction: column; }
 .a-fill { height: 100%; border-radius: 2px; }
 .a-val { color: var(--cream); min-width: 60px; text-align: right; }
 
-/* chart */
 .chart-wrap { padding: 0.75rem 1rem 0.5rem; }
 canvas { display: block; width: 100% !important; }
 
-/* table */
 .tbl-wrap { overflow-x: auto; max-height: 220px; overflow-y: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 0.58rem; }
 th { background: rgba(212,175,55,0.1); color: var(--gold); padding: 0.4rem 0.6rem; text-align: left; letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; }
@@ -200,6 +190,11 @@ td.fast { color: var(--gold2); }
 .export-an { width: 100%; padding: 0.9rem; border-radius: 6px; border: 1px solid var(--green2); font-family: 'Source Code Pro', monospace; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: var(--green); color: var(--gold2); transition: all 0.2s; display: none; }
 .export-an.show { display: block; }
 .export-an:active { transform: scale(0.97); }
+
+/* map */
+.map-wrap { height: 260px; border-radius: 0 0 6px 6px; overflow: hidden; }
+.map-legend { padding: 0.5rem 1rem; display: flex; gap: 1rem; font-size: 0.58rem; color: var(--muted); background: var(--surface); border-top: 1px solid var(--border); }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
 
 footer { height: 8px; background: repeating-linear-gradient(90deg, var(--maroon) 0px, var(--maroon) 20px, var(--gold) 20px, var(--gold) 22px, var(--green) 22px, var(--green) 42px, var(--gold) 42px, var(--gold) 44px); position: sticky; bottom: 0; }
 
@@ -219,15 +214,7 @@ footer { height: 8px; background: repeating-linear-gradient(90deg, var(--maroon)
   <div class="trip-badge" id="badge">IDLE</div>
 </header>
 
-<nav class="tab-nav">
-  <button class="tab-btn active" id="tbTracker" onclick="switchTab('tracker')">▶ Live Track</button>
-  <button class="tab-btn" id="tbAnalysis" onclick="switchTab('analysis')">◈ Analyze CSV</button>
-</nav>
-
 <main>
-
-<!-- ══════════ TRACKER ══════════ -->
-<div class="tab-panel active" id="tab-tracker">
 <div class="tracker-content">
 
   <div class="ring-wrap">
@@ -310,79 +297,83 @@ footer { height: 8px; background: repeating-linear-gradient(90deg, var(--maroon)
   <div class="btns">
     <button class="btn btn-start" id="btnStart" onclick="startTrip()">▶ Start Trip</button>
     <button class="btn btn-stop"  id="btnStop"  onclick="stopTrip()"  disabled>■ Stop Trip</button>
-    <button class="btn btn-export" id="btnExport" onclick="exportCSV()" disabled>↓ Export CSV</button>
+    <button class="btn btn-export" id="btnExport" onclick="exportCSV()" disabled>↓ Export Raw CSV</button>
   </div>
 
-</div>
-</div>
+  <!-- ══ INLINE ANALYSIS (auto-runs after stop) ══ -->
+  <div class="analysis-inline" id="analysisInline">
 
-<!-- ══════════ ANALYSIS ══════════ -->
-<div class="tab-panel" id="tab-analysis">
-<div class="analysis-content">
+    <div class="an-divider"><span>◈ Deep Analysis</span></div>
 
-  <div class="upload-zone" id="uploadZone">
-    <input type="file" id="csvInput" accept=".csv" onchange="handleFile(this.files[0])">
-    <div class="upload-icon">📂</div>
-    <div class="upload-title">Load Trip CSV</div>
-    <div class="upload-hint">CSV exported from Biyahe Check · RouteTrack PH</div>
-    <div class="upload-fname" id="uploadFname"></div>
-  </div>
-
-  <div class="clean-note" id="cleanNote"></div>
-
-  <button class="proc-btn" id="procBtn" onclick="analyzeData()" disabled>◈ Analyze Trip</button>
-
-  <div class="an-section" id="secSummary">
-    <div class="an-hd"><span>Full Day Summary</span><span class="badge" id="sumDate">—</span></div>
-    <div class="m-grid">
-      <div class="m-cell"><div class="m-lbl">Total Distance</div><div class="m-val gold" id="an-dist">—</div><div class="m-unit">km</div></div>
-      <div class="m-cell"><div class="m-lbl">Duration</div><div class="m-val" id="an-dur">—</div><div class="m-unit">elapsed</div></div>
-      <div class="m-cell"><div class="m-lbl">Avg Speed (moving)</div><div class="m-val" id="an-avgmov">—</div><div class="m-unit">km/h</div></div>
-      <div class="m-cell"><div class="m-lbl">Max Speed</div><div class="m-val gold" id="an-max">—</div><div class="m-unit">km/h</div></div>
-      <div class="m-cell"><div class="m-lbl">Idle Time</div><div class="m-val red" id="an-idle">—</div><div class="m-unit">minutes</div></div>
-      <div class="m-cell"><div class="m-lbl">Stop Events</div><div class="m-val red" id="an-stops">—</div><div class="m-unit">≥15s idle</div></div>
-      <div class="m-cell"><div class="m-lbl">GPS Points</div><div class="m-val" id="an-pts">—</div><div class="m-unit">clean readings</div></div>
-      <div class="m-cell"><div class="m-lbl">Mean Accuracy</div><div class="m-val" id="an-acc">—</div><div class="m-unit">meters</div></div>
-      <div class="m-cell full"><div class="m-lbl">Trip Window</div><div class="m-val sm" id="an-window">—</div></div>
+    <div class="analyzing-spinner" id="analyzeSpinner">
+      <div class="spin"></div>
+      <span>Analyzing trip data…</span>
     </div>
-  </div>
 
-  <div class="an-section" id="secChart">
-    <div class="an-hd"><span>Speed Over Time</span><span class="badge" id="chartBadge">—</span></div>
-    <div class="chart-wrap"><canvas id="speedChart" height="120"></canvas></div>
-  </div>
+    <div class="clean-note" id="cleanNote"></div>
 
-  <div class="an-section" id="secAcc">
-    <div class="an-hd"><span>GPS Accuracy Breakdown</span></div>
-    <div class="acc-rows" id="accRows"></div>
-  </div>
-
-  <div class="an-section" id="secTable">
-    <div class="an-hd"><span>Point-by-Point Data</span><span class="badge" id="tblBadge">—</span></div>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr>
-          <th>Time</th><th>Lat</th><th>Lon</th>
-          <th>Spd (km/h)</th><th>Acc (m)</th>
-          <th>Seg (km)</th><th>Cum (km)</th><th>State</th>
-        </tr></thead>
-        <tbody id="dataBody"></tbody>
-      </table>
+    <div class="an-section" id="secSummary">
+      <div class="an-hd"><span>Full Day Summary</span><span class="badge" id="sumDate">—</span></div>
+      <div class="m-grid">
+        <div class="m-cell"><div class="m-lbl">Total Distance</div><div class="m-val gold" id="an-dist">—</div><div class="m-unit">km</div></div>
+        <div class="m-cell"><div class="m-lbl">Duration</div><div class="m-val" id="an-dur">—</div><div class="m-unit">elapsed</div></div>
+        <div class="m-cell"><div class="m-lbl">Avg Speed (moving)</div><div class="m-val" id="an-avgmov">—</div><div class="m-unit">km/h</div></div>
+        <div class="m-cell"><div class="m-lbl">Max Speed</div><div class="m-val gold" id="an-max">—</div><div class="m-unit">km/h</div></div>
+        <div class="m-cell"><div class="m-lbl">Idle Time</div><div class="m-val red" id="an-idle">—</div><div class="m-unit">minutes</div></div>
+        <div class="m-cell"><div class="m-lbl">Stop Events</div><div class="m-val red" id="an-stops">—</div><div class="m-unit">≥15s idle</div></div>
+        <div class="m-cell"><div class="m-lbl">GPS Points</div><div class="m-val" id="an-pts">—</div><div class="m-unit">clean readings</div></div>
+        <div class="m-cell"><div class="m-lbl">Mean Accuracy</div><div class="m-val" id="an-acc">—</div><div class="m-unit">meters</div></div>
+        <div class="m-cell full"><div class="m-lbl">Trip Window</div><div class="m-val sm" id="an-window">—</div></div>
+      </div>
     </div>
-  </div>
 
-  <button class="export-an" id="exportAnBtn" onclick="exportProcessed()">↓ Export Processed CSV</button>
+    <div class="an-section" id="secChart">
+      <div class="an-hd"><span>Speed Over Time</span><span class="badge" id="chartBadge">—</span></div>
+      <div class="chart-wrap"><canvas id="speedChart" height="120"></canvas></div>
+    </div>
+
+    <div class="an-section" id="secAcc">
+      <div class="an-hd"><span>GPS Accuracy Breakdown</span></div>
+      <div class="acc-rows" id="accRows"></div>
+    </div>
+
+    <div class="an-section" id="secTable">
+      <div class="an-hd"><span>Point-by-Point Data</span><span class="badge" id="tblBadge">—</span></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Time</th><th>Lat</th><th>Lon</th>
+            <th>Spd (km/h)</th><th>Acc (m)</th>
+            <th>Seg (km)</th><th>Cum (km)</th><th>State</th>
+          </tr></thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="an-section" id="secMap">
+      <div class="an-hd"><span>Route Map</span><span class="badge" id="mapBadge">—</span></div>
+      <div class="map-wrap" id="tripMap"></div>
+      <div class="map-legend">
+        <span><span class="leg-dot" style="background:#2d9e2d"></span>Moving</span>
+        <span><span class="leg-dot" style="background:#E05050"></span>Idle / Stop</span>
+        <span><span class="leg-dot" style="background:#D4AF37"></span>Start</span>
+        <span><span class="leg-dot" style="background:#E05050;border:2px solid #fff"></span>End</span>
+      </div>
+    </div>
+
+    <button class="export-an" id="exportAnBtn" onclick="exportProcessed()">↓ Export Processed CSV</button>
+
+  </div><!-- /analysis-inline -->
 
 </div>
-</div>
-
 </main>
 
 <footer></footer>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-/* ── UTILS ── */
 function hav(la1,lo1,la2,lo2){
   var R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
   var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
@@ -403,15 +394,6 @@ function toast(msg,ms){
 function dlBlob(content,type,name){
   var b=new Blob([content],{type:type}),u=URL.createObjectURL(b),a=document.createElement('a');
   a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
-}
-
-/* ── TAB SWITCH ── */
-function switchTab(name){
-  ['tracker','analysis'].forEach(function(n){
-    document.getElementById('tab-'+n).classList.toggle('active',n===name);
-  });
-  document.getElementById('tbTracker').classList.toggle('active',name==='tracker');
-  document.getElementById('tbAnalysis').classList.toggle('active',name==='analysis');
 }
 
 /* ════════════════════════════════════════
@@ -497,6 +479,12 @@ function startTrip(){
   document.getElementById('logScroll').innerHTML='<div class="log-empty" id="logEmpty">Acquiring GPS signal...</div>';
   document.getElementById('logCnt').textContent='0 pts';
   document.getElementById('summaryBox').classList.remove('show');
+  // hide previous analysis
+  document.getElementById('analysisInline').classList.remove('show');
+  ['secSummary','secChart','secAcc','secTable','secMap'].forEach(function(id){document.getElementById(id).classList.remove('show');});
+  document.getElementById('exportAnBtn').classList.remove('show');
+  document.getElementById('cleanNote').classList.remove('show');
+  document.getElementById('analyzeSpinner').classList.remove('show');
   document.getElementById('btnStart').disabled=true;
   document.getElementById('btnStop').disabled=false;
   document.getElementById('btnExport').disabled=true;
@@ -537,7 +525,10 @@ function stopTrip(){
     document.getElementById('sumStops').textContent=stopEvts;
     document.getElementById('summaryBox').classList.add('show');
   }
-  toast('Finished. '+rows.length+' points recorded.');tripN++;
+  toast('Finished. '+rows.length+' points recorded.');
+  tripN++;
+  // ── auto-trigger deep analysis ──
+  if(rows.length>=2) setTimeout(analyzeFromRows, 200);
 }
 
 function exportCSV(){
@@ -549,54 +540,34 @@ function exportCSV(){
 }
 
 /* ════════════════════════════════════════
-   ANALYSIS ENGINE — mirrors Python notebook
-   Steps 2–8 of RouteTrack PH / GE 168 logic
+   ANALYSIS ENGINE — runs directly on live rows
 ════════════════════════════════════════ */
-var anRaw=[],anClean=[],anProc=[];
+var anProc=[];
 
-/* drag-drop */
-var uz=document.getElementById('uploadZone');
-uz.addEventListener('dragover',function(e){e.preventDefault();uz.classList.add('drag');});
-uz.addEventListener('dragleave',function(){uz.classList.remove('drag');});
-uz.addEventListener('drop',function(e){e.preventDefault();uz.classList.remove('drag');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+function analyzeFromRows(){
+  // Show spinner while parsing
+  var inline=document.getElementById('analysisInline');
+  inline.classList.add('show');
+  document.getElementById('analyzeSpinner').classList.add('show');
 
-function handleFile(file){
-  if(!file)return;
-  document.getElementById('uploadFname').textContent=file.name;
-  document.getElementById('uploadFname').style.display='block';
-  var r=new FileReader();
-  r.onload=function(e){
-    anRaw=parseCSV(e.target.result);
-    if(anRaw.length===0){toast('Could not parse CSV',3000);return;}
-    document.getElementById('procBtn').disabled=false;
-    ['secSummary','secChart','secAcc','secTable'].forEach(function(id){document.getElementById(id).classList.remove('show');});
-    document.getElementById('exportAnBtn').classList.remove('show');
-    document.getElementById('cleanNote').classList.remove('show');
-    toast('Loaded '+anRaw.length+' rows — tap Analyze',3000);
-  };
-  r.readAsText(file);
+  // Slight async delay so spinner renders before heavy computation
+  setTimeout(function(){
+    _runAnalysis();
+  },50);
 }
 
-function parseCSV(text){
-  var lines=text.trim().split('\n');if(lines.length<2)return[];
-  var hdr=lines[0].split(',').map(function(h){return h.trim().replace(/^"|"$/g,'');});
-  var out=[];
-  for(var i=1;i<lines.length;i++){
-    var v=lines[i].split(',');if(v.length<2)continue;
-    var o={};hdr.forEach(function(h,j){o[h]=(v[j]||'').trim().replace(/^"|"$/g,'');});out.push(o);
-  }
-  return out;
-}
-
-function analyzeData(){
-  if(anRaw.length===0)return;
-
-  /* Step 2 — parse + sort */
-  var df=anRaw.map(function(r){
-    return{ts:new Date(r.timestamp),lat:parseFloat(r.latitude),lon:parseFloat(r.longitude),
-      spd:parseFloat(r.speed_kmh)||0,acc:parseFloat(r.accuracy_m)||99,
+function _runAnalysis(){
+  /* Step 2 — parse rows into df format */
+  var df=rows.map(function(r){
+    return{
+      ts:new Date(r.timestamp),
+      lat:parseFloat(r.latitude),
+      lon:parseFloat(r.longitude),
+      spd:parseFloat(r.speed_kmh)||0,
+      acc:parseFloat(r.accuracy_m)||99,
       hdg:r.heading_deg?parseFloat(r.heading_deg)||null:null,
-      alt:r.altitude_m?parseFloat(r.altitude_m)||null:null};
+      alt:r.altitude_m?parseFloat(r.altitude_m)||null:null
+    };
   }).filter(function(r){return!isNaN(r.ts.getTime())&&!isNaN(r.lat)&&!isNaN(r.lon);});
   df.sort(function(a,b){return a.ts-b.ts;});
   var orig=df.length;
@@ -604,9 +575,8 @@ function analyzeData(){
   /* Step 3 — clean */
   var seen={};
   df=df.filter(function(r){var k=r.ts.getTime();if(seen[k])return false;seen[k]=true;return true;});
-  df=df.filter(function(r){return r.spd<=150;});          // remove GPS spikes
-  df=df.filter(function(r){return r.acc<=50;});           // remove poor accuracy
-  // fill zero speeds from coordinates
+  df=df.filter(function(r){return r.spd<=150;});
+  df=df.filter(function(r){return r.acc<=50;});
   for(var i=1;i<df.length;i++){
     if(df[i].spd===0){
       var dt2=(df[i].ts-df[i-1].ts)/1000;
@@ -614,6 +584,12 @@ function analyzeData(){
     }
   }
   var removed=orig-df.length;
+
+  if(df.length<2){
+    document.getElementById('analyzeSpinner').classList.remove('show');
+    toast('Not enough clean points to analyze.',3000);
+    return;
+  }
 
   /* Step 4 — Haversine distances */
   var segKm=[0],cumKm=0,cumArr=[0];
@@ -630,7 +606,7 @@ function analyzeData(){
   var avgMov=movSpds.length>0?movSpds.reduce(function(a,b){return a+b;},0)/movSpds.length:0;
   var maxS=Math.max.apply(null,df.map(function(r){return r.spd;}));
 
-  /* Step 6 — idle & stops (exact Python logic) */
+  /* Step 6 — idle & stops */
   var IM=15,idleS=0,stpN=0,inI=false,cI=0,stpIdx=[];
   var isIdle=df.map(function(r){return r.spd<IT;});
   for(var i=1;i<df.length;i++){
@@ -658,6 +634,8 @@ function analyzeData(){
   anProc=df.map(function(r,i){return{timestamp:r.ts.toISOString(),latitude:r.lat,longitude:r.lon,speed_kmh:r.spd,accuracy_m:r.acc,heading_deg:r.hdg,altitude_m:r.alt,segment_km:segKm[i],cumulative_km:cumArr[i],is_idle:isIdle[i]};});
 
   /* ── Render ── */
+  document.getElementById('analyzeSpinner').classList.remove('show');
+
   var dateStr=t0.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
   document.getElementById('sumDate').textContent=dateStr;
   document.getElementById('an-dist').textContent=cumKm.toFixed(3);
@@ -670,14 +648,12 @@ function analyzeData(){
   document.getElementById('an-acc').textContent=meanAcc.toFixed(1)+' m';
   document.getElementById('an-window').textContent=fmtTime(t0)+' → '+fmtTime(t1);
 
-  /* clean note */
   if(removed>0){
     var cn=document.getElementById('cleanNote');
     cn.innerHTML='<strong>Data Cleaning:</strong> Removed <strong>'+removed+'</strong> noisy point'+(removed!==1?'s':'')+' (duplicates, spikes >150 km/h, accuracy >50 m). Analysing <strong>'+df.length+'</strong> clean points.';
     cn.classList.add('show');
   }
 
-  /* accuracy breakdown */
   var ar=document.getElementById('accRows');ar.innerHTML='';
   Object.keys(grades).forEach(function(lbl){
     var cnt=grades[lbl],pct=df.length?cnt/df.length*100:0;
@@ -686,11 +662,11 @@ function analyzeData(){
     ar.appendChild(row);
   });
 
-  /* speed chart */
-  renderChart(df,stpIdx,IT);
+  /* show chart section first so canvas has layout width */
+  document.getElementById('secChart').classList.add('show');
   document.getElementById('chartBadge').textContent=stpN+' stop'+(stpN!==1?'s':'')+' · max '+maxS.toFixed(1)+' km/h';
+  renderChart(df,stpIdx,IT);
 
-  /* data table (first 200 rows) */
   var tb=document.getElementById('dataBody');tb.innerHTML='';
   var mx=Math.min(df.length,200);
   for(var i=0;i<mx;i++){
@@ -705,7 +681,13 @@ function analyzeData(){
   }
   document.getElementById('tblBadge').textContent=(df.length>200?'first 200 of ':'')+df.length+' pts';
 
-  ['secSummary','secChart','secAcc','secTable'].forEach(function(id){document.getElementById(id).classList.add('show');});
+  ['secSummary','secAcc','secTable'].forEach(function(id){document.getElementById(id).classList.add('show');});
+
+  /* ── Route Map ── */
+  document.getElementById('secMap').classList.add('show');
+  document.getElementById('mapBadge').textContent=df.length+' pts · '+cumKm.toFixed(2)+' km';
+  setTimeout(function(){ renderMap(df, isIdle, stpIdx); }, 80);
+
   document.getElementById('exportAnBtn').classList.add('show');
   toast('Analysis complete — '+df.length+' clean points',3000);
 }
@@ -720,34 +702,73 @@ function renderChart(df,stpIdx,IT){
 
   ctx.fillStyle='#2a1010';ctx.fillRect(0,0,W,H);
 
-  /* idle threshold line */
   var yIT=H-(IT/maxS)*(H-6);
   ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(224,80,80,0.4)';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(0,yIT);ctx.lineTo(W,yIT);ctx.stroke();
   ctx.setLineDash([]);
 
-  /* fill */
   ctx.beginPath();ctx.moveTo(0,H);
   for(var i=0;i<n;i++){var x=i/(n-1||1)*W,y=H-(spds[i]/maxS)*(H-6);if(i===0)ctx.lineTo(x,y);else ctx.lineTo(x,y);}
   ctx.lineTo(W,H);ctx.closePath();
   var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(212,175,55,0.5)');g.addColorStop(1,'rgba(212,175,55,0.03)');
   ctx.fillStyle=g;ctx.fill();
 
-  /* line */
   ctx.beginPath();ctx.strokeStyle='#D4AF37';ctx.lineWidth=1.5;
   for(var i=0;i<n;i++){var x=i/(n-1||1)*W,y=H-(spds[i]/maxS)*(H-6);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
   ctx.stroke();
 
-  /* stop markers */
   stpIdx.forEach(function(idx){
     var x=idx/(n-1||1)*W,y=H-(spds[idx]/maxS)*(H-6);
     ctx.fillStyle='#E05050';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
   });
 
-  /* labels */
   ctx.font='9px Source Code Pro,monospace';
   ctx.fillStyle='rgba(212,175,55,0.65)';ctx.fillText(maxS.toFixed(0)+' km/h',4,12);
   ctx.fillStyle='rgba(224,80,80,0.55)';ctx.fillText(IT+' km/h (idle)',4,yIT-3);
+}
+
+var tripMap=null;
+
+function renderMap(df, isIdle, stpIdx){
+  var mapEl=document.getElementById('tripMap');
+  if(tripMap){tripMap.remove();tripMap=null;}
+  tripMap=L.map(mapEl,{zoomControl:true,attributionControl:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(tripMap);
+
+  /* draw color-coded polyline segments */
+  for(var i=1;i<df.length;i++){
+    var idle=isIdle[i];
+    L.polyline([[df[i-1].lat,df[i-1].lon],[df[i].lat,df[i].lon]],{
+      color: idle?'#E05050':'#2d9e2d',
+      weight: idle?3:4,
+      opacity: 0.85
+    }).addTo(tripMap);
+  }
+
+  /* stop markers */
+  stpIdx.forEach(function(idx){
+    L.circleMarker([df[idx].lat,df[idx].lon],{
+      radius:6, color:'#fff', weight:1.5,
+      fillColor:'#E05050', fillOpacity:0.9
+    }).bindPopup('Stop #'+stpIdx.indexOf(idx)+1+'<br>'+df[idx].ts.toTimeString().slice(0,8)).addTo(tripMap);
+  });
+
+  /* start marker */
+  L.circleMarker([df[0].lat,df[0].lon],{
+    radius:8, color:'#fff', weight:2,
+    fillColor:'#D4AF37', fillOpacity:1
+  }).bindPopup('Start<br>'+df[0].ts.toTimeString().slice(0,8)).addTo(tripMap);
+
+  /* end marker */
+  var last=df[df.length-1];
+  L.circleMarker([last.lat,last.lon],{
+    radius:8, color:'#fff', weight:2,
+    fillColor:'#E05050', fillOpacity:1
+  }).bindPopup('End<br>'+last.ts.toTimeString().slice(0,8)).addTo(tripMap);
+
+  /* fit bounds */
+  var lats=df.map(function(r){return r.lat;}),lons=df.map(function(r){return r.lon;});
+  tripMap.fitBounds([[Math.min.apply(null,lats),Math.min.apply(null,lons)],[Math.max.apply(null,lats),Math.max.apply(null,lons)]],{padding:[18,18]});
 }
 
 function exportProcessed(){
