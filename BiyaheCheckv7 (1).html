@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Biyahe Check</title>
+<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700;800&family=Libre+Baskerville:wght@400;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg:        #f0ede8;
+  --surface:   #faf8f5;
+  --border:    rgba(180,140,60,0.18);
+  --maroon:    #6b1212;
+  --maroon2:   #8a1c1c;
+  --maroon-lt: #a82222;
+  --gold:      #C9A227;
+  --gold2:     #E8B830;
+  --green:     #1a3d1a;
+  --green2:    #245924;
+  --cream:     #FFF8E7;
+  --text:      #2e2a24;
+  --text-mid:  #6a6460;
+  --text-dim:  #9a948e;
+  --red:       #c0392b;
+  --red-lt:    #e74c3c;
+  --red-bg:    #4a0e0e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background-color: #f0ede8;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='500' viewBox='0 0 900 500'%3E%3Cg fill='none' stroke='%23888070' stroke-width='1' opacity='0.13'%3E%3Cellipse cx='200' cy='340' rx='180' ry='130'/%3E%3Cellipse cx='200' cy='340' rx='155' ry='108'/%3E%3Cellipse cx='200' cy='340' rx='130' ry='86'/%3E%3Cellipse cx='200' cy='340' rx='105' ry='65'/%3E%3Cellipse cx='200' cy='340' rx='80' ry='46'/%3E%3Cellipse cx='200' cy='340' rx='56' ry='30'/%3E%3Cellipse cx='200' cy='340' rx='34' ry='17'/%3E%3Cellipse cx='680' cy='160' rx='200' ry='155'/%3E%3Cellipse cx='680' cy='160' rx='172' ry='130'/%3E%3Cellipse cx='680' cy='160' rx='144' ry='106'/%3E%3Cellipse cx='680' cy='160' rx='116' ry='82'/%3E%3Cellipse cx='680' cy='160' rx='88' ry='60'/%3E%3Cellipse cx='680' cy='160' rx='62' ry='40'/%3E%3Cellipse cx='680' cy='160' rx='38' ry='23'/%3E%3Cellipse cx='680' cy='160' rx='18' ry='10'/%3E%3Cellipse cx='450' cy='250' rx='260' ry='200' transform='rotate(-15 450 250)'/%3E%3Cellipse cx='450' cy='250' rx='220' ry='166' transform='rotate(-15 450 250)'/%3E%3Cellipse cx='450' cy='250' rx='180' ry='133' transform='rotate(-15 450 250)'/%3E%3Cellipse cx='450' cy='250' rx='140' ry='100' transform='rotate(-15 450 250)'/%3E%3Cellipse cx='450' cy='250' rx='100' ry='70' transform='rotate(-15 450 250)'/%3E%3Cellipse cx='450' cy='250' rx='62' ry='42' transform='rotate(-15 450 250)'/%3E%3Cellipse cx='80' cy='100' rx='120' ry='85' transform='rotate(20 80 100)'/%3E%3Cellipse cx='80' cy='100' rx='94' ry='64' transform='rotate(20 80 100)'/%3E%3Cellipse cx='80' cy='100' rx='68' ry='45' transform='rotate(20 80 100)'/%3E%3Cellipse cx='80' cy='100' rx='44' ry='28' transform='rotate(20 80 100)'/%3E%3Cellipse cx='80' cy='100' rx='22' ry='14' transform='rotate(20 80 100)'/%3E%3Cellipse cx='830' cy='420' rx='130' ry='95' transform='rotate(-10 830 420)'/%3E%3Cellipse cx='830' cy='420' rx='100' ry='72' transform='rotate(-10 830 420)'/%3E%3Cellipse cx='830' cy='420' rx='72' ry='50' transform='rotate(-10 830 420)'/%3E%3Cellipse cx='830' cy='420' rx='46' ry='30' transform='rotate(-10 830 420)'/%3E%3Cpath d='M0,200 Q150,120 300,200 Q450,280 600,180 Q750,80 900,160' /%3E%3Cpath d='M0,230 Q150,150 300,230 Q450,310 600,210 Q750,110 900,190' /%3E%3Cpath d='M0,260 Q150,180 300,260 Q450,340 600,240 Q750,140 900,220' /%3E%3Cpath d='M0,290 Q150,210 300,290 Q450,370 600,270 Q750,170 900,250' /%3E%3Cpath d='M0,320 Q150,240 300,320 Q450,400 600,300 Q750,200 900,280' /%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 20% 10%, rgba(107,18,18,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(201,162,39,0.03) 0%, transparent 55%);
+  background-size: cover, 100% 100%, 100% 100%;
+  background-attachment: fixed, fixed, fixed;
+  color: var(--text);
+  font-family: 'League Spartan', sans-serif;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.stripe {
+  height: 6px;
+  background: repeating-linear-gradient(90deg,
+    var(--maroon) 0px, var(--maroon) 18px,
+    var(--gold) 18px, var(--gold) 20px,
+    var(--green) 20px, var(--green) 38px,
+    var(--gold) 38px, var(--gold) 40px);
+}
+
+header {
+  padding: 1rem 1.25rem 0.85rem;
+  background: var(--maroon);
+  border-bottom: 2px solid var(--gold);
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 100% 50%, rgba(201,162,39,0.12) 0%, transparent 70%),
+    repeating-linear-gradient(90deg, transparent, transparent 48px, rgba(255,255,255,0.025) 48px, rgba(255,255,255,0.025) 49px);
+  pointer-events: none;
+}
+.logo { font-family: 'Libre Baskerville', serif; font-size: 1.45rem; font-weight: 700; letter-spacing: 0.03em; color: var(--cream); position: relative; text-shadow: 1px 2px 4px rgba(0,0,0,0.5); }
+.logo .hi { color: var(--gold2); }
+.logo-sub { font-size: 0.52rem; letter-spacing: 0.22em; color: rgba(255,248,231,0.45); font-family: 'League Spartan', sans-serif; font-weight: 400; text-transform: uppercase; margin-top: 2px; }
+.trip-badge { font-size: 0.6rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(201,162,39,0.25); padding: 5px 11px; border-radius: 3px; color: rgba(255,248,231,0.4); letter-spacing: 0.14em; font-family: 'League Spartan', sans-serif; font-weight: 700; transition: all 0.4s; text-transform: uppercase; }
+.trip-badge.active { color: var(--gold2); border-color: var(--gold); background: rgba(201,162,39,0.18); box-shadow: 0 0 12px rgba(201,162,39,0.15); }
+
+main { flex: 1; padding: 1rem 1.1rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+.ring-wrap { display: flex; flex-direction: column; align-items: center; padding: 0.4rem 0 0.2rem; gap: 0.45rem; }
+.ring-outer { width: 156px; height: 156px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; position: relative; transition: border-color 0.4s; background: radial-gradient(circle at 50% 35%, #f8f4ee, var(--bg)); box-shadow: 0 4px 24px rgba(107,18,18,0.1), inset 0 1px 0 rgba(255,255,255,0.6); }
+.ring-outer::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; border: 1px solid rgba(201,162,39,0.18); pointer-events: none; }
+.ring-outer.rec { border-color: #2e7d32; box-shadow: 0 0 0 3px rgba(46,125,50,0.2), 0 4px 28px rgba(26,61,26,0.25); }
+.ring-outer.rec::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, #4caf50, #81c784 40%, transparent 65%); animation: spinLoad 1.4s linear infinite; -webkit-mask: radial-gradient(circle, transparent 60%, black 62%); mask: radial-gradient(circle, transparent 60%, black 62%); }
+@keyframes spinLoad { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.ring-inner { width: 114px; height: 114px; border-radius: 50%; background: var(--maroon); border: 1px solid rgba(201,162,39,0.22); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.4); }
+.spd-val { font-family: 'Libre Baskerville', serif; font-size: 2.3rem; font-weight: 700; line-height: 1; color: var(--cream); transition: color 0.3s; }
+.spd-val.mv { color: var(--gold2); }
+.spd-unit { font-size: 0.58rem; color: rgba(255,248,231,0.45); letter-spacing: 0.18em; }
+.status-lbl { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em; color: var(--gold); text-transform: uppercase; font-family: 'League Spartan', sans-serif; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red-lt); display: inline-block; margin-right: 5px; animation: blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-top: 2.5px solid var(--gold); border-radius: 5px; padding: 0.8rem 0.9rem; display: flex; flex-direction: column; gap: 0.18rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.card-lbl { font-size: 0.62rem; color: var(--text-dim); font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+.card-val { font-size: 1.45rem; font-family: 'Libre Baskerville', serif; font-weight: 700; line-height: 1.1; color: var(--maroon); }
+.card-unit { font-size: 0.62rem; color: var(--text-dim); letter-spacing: 0.08em; }
+
+.map-card { background: var(--surface); border: 1px solid var(--border); border-radius: 5px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.map-card .card-lbl { padding: 0.75rem 0.9rem 0.6rem; font-size: 0.62rem; color: var(--text-dim); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+#map { width: 100%; min-height: 255px; background: #ece8e0; }
+
+.acc-bar-wrap { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
+.acc-bar { flex: 1; height: 5px; border-radius: 2px; background: rgba(201,162,39,0.12); overflow: hidden; }
+.acc-fill { height: 100%; border-radius: 2px; background: var(--gold); width: 0; transition: width 0.5s, background 0.5s; }
+.acc-grade { font-size: 0.58rem; color: var(--text-dim); white-space: nowrap; letter-spacing: 0.06em; }
+.sig { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+.sb { width: 3px; border-radius: 1px; background: rgba(201,162,39,0.2); transition: background 0.4s; }
+.sb.on { background: var(--gold); }
+
+.log-box { background: var(--surface); border: 1px solid var(--border); border-radius: 5px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.log-hd { padding: 0.55rem 0.9rem; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cream); border-bottom: 1px solid rgba(201,162,39,0.2); display: flex; justify-content: space-between; align-items: center; background: var(--maroon); }
+.log-cnt { font-family: 'Source Code Pro', monospace; font-weight: 500; color: var(--gold2); font-size: 0.68rem; }
+.log-scroll { max-height: 108px; overflow-y: auto; }
+.log-row { padding: 0.24rem 0.9rem; font-size: 0.7rem; color: var(--text-mid); border-bottom: 1px solid rgba(201,162,39,0.05); display: flex; gap: 0.5rem; align-items: center; animation: fi 0.2s ease; font-family: 'Source Code Pro', monospace; }
+@keyframes fi { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:none; } }
+.log-row .ts { color: var(--gold); min-width: 78px; }
+.log-row .spd-tag { color: var(--maroon2); font-weight: 500; }
+.log-empty { padding: 1rem 0.9rem; font-size: 0.75rem; color: var(--text-dim); text-align: center; line-height: 1.5; }
+
+.summary-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 5px; padding: 1rem; display: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.summary-box.show { display: block; }
+.sum-title { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.7rem; font-weight: 700; }
+.sum-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.42rem 0; border-bottom: 1px solid rgba(201,162,39,0.07); line-height: 1.3; }
+.sum-row:last-child { border-bottom: none; }
+.sum-row span:first-child { color: var(--text-mid); font-weight: 400; }
+.sum-row span:last-child { color: var(--maroon); font-weight: 600; }
+
+.btns { display: flex; flex-direction: column; gap: 0.55rem; margin-top: auto; padding-top: 0.2rem; }
+.btn { width: 100%; padding: 0.9rem; border-radius: 5px; border: none; font-family: 'League Spartan', sans-serif; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: transform 0.12s, filter 0.15s, box-shadow 0.15s; font-weight: 700; }
+.btn:active { transform: scale(0.97); filter: brightness(0.9); }
+.btn:disabled { opacity: 0.28; pointer-events: none; }
+.btn-start { background: var(--gold2); color: var(--maroon); border: 2px solid rgba(201,162,39,0.6); box-shadow: 0 2px 12px rgba(201,162,39,0.3); padding: 1.2rem; font-size: 0.95rem; letter-spacing: 0.14em; }
+.btn-stop  { background: var(--red); color: #ffeaea; border: 1px solid rgba(192,57,43,0.5); box-shadow: 0 2px 10px rgba(192,57,43,0.2); padding: 1.2rem; font-size: 0.95rem; letter-spacing: 0.14em; }
+.btn-export { background: var(--green); color: var(--gold2); border: 1px solid rgba(26,61,26,0.6); box-shadow: 0 2px 8px rgba(26,61,26,0.15); }
+.btn-image { background: #1a3a5c; color: #c8dff5; border: 1px solid rgba(26,58,92,0.5); box-shadow: 0 2px 8px rgba(26,58,92,0.15); }
+
+.perm-error { background: var(--red-bg); border: 1px solid rgba(192,57,43,0.45); border-left: 3px solid var(--red-lt); border-radius: 5px; padding: 0.8rem 1rem; font-size: 0.8rem; color: #ffcbcb; line-height: 1.5; display: none; }
+.perm-error.show { display: block; }
+.perm-error strong { color: #ff9f9f; display: block; margin-bottom: 0.3rem; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+footer { height: 6px; background: repeating-linear-gradient(90deg, var(--maroon) 0px, var(--maroon) 18px, var(--gold) 18px, var(--gold) 20px, var(--green) 20px, var(--green) 38px, var(--gold) 38px, var(--gold) 40px); position: sticky; bottom: 0; }
+
+.toast { position: fixed; bottom: calc(1.5rem + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(14px); background: var(--maroon); border: 1px solid var(--gold); border-radius: 4px; padding: 0.5rem 1.2rem; font-size: 0.65rem; color: var(--cream); opacity: 0; transition: all 0.26s; white-space: nowrap; pointer-events: none; z-index: 999; font-family: 'Source Code Pro', monospace; letter-spacing: 0.06em; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(201,162,39,0.3); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════
+   OFF-SCREEN REPORT CARD  (rendered → PNG)
+   Width fixed at 780px so html2canvas gets a
+   consistent layout regardless of phone width.
+═══════════════════════════════════════════════ */
+#reportCard {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 780px;
+  background: #f0ede8;
+  font-family: 'League Spartan', sans-serif;
+  color: #2e2a24;
+  overflow: hidden;
+}
+
+/* report stripe */
+.rc-stripe {
+  height: 8px;
+  background: repeating-linear-gradient(90deg,
+    #6b1212 0px, #6b1212 18px,
+    #C9A227 18px, #C9A227 20px,
+    #1a3d1a 20px, #1a3d1a 38px,
+    #C9A227 38px, #C9A227 40px);
+}
+
+/* report header */
+.rc-header {
+  background: #6b1212;
+  padding: 22px 28px 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 2px solid #C9A227;
+}
+.rc-logo-name {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #FFF8E7;
+  letter-spacing: 0.02em;
+}
+.rc-logo-name span { color: #E8B830; }
+.rc-logo-sub {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: rgba(255,248,231,0.45);
+  text-transform: uppercase;
+  margin-top: 3px;
+  font-weight: 400;
+}
+.rc-header-right {
+  text-align: right;
+}
+.rc-report-label {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #C9A227;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.rc-trip-id {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 12px;
+  color: rgba(255,248,231,0.6);
+  letter-spacing: 0.08em;
+}
+.rc-generated {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 10px;
+  color: rgba(255,248,231,0.4);
+  margin-top: 3px;
+}
+
+/* report body */
+.rc-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+/* map snapshot inside report */
+.rc-map-wrap {
+  width: 100%;
+  height: 300px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(180,140,60,0.25);
+  background: #e8e4dc;
+  position: relative;
+}
+#reportMap { width: 100%; height: 100%; }
+
+.rc-map-legend {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(250,248,245,0.92);
+  border: 1px solid rgba(180,140,60,0.2);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 10px;
+  color: #6a6460;
+  display: flex;
+  gap: 12px;
+  backdrop-filter: blur(4px);
+}
+.rc-legend-item { display: flex; align-items: center; gap: 5px; }
+.rc-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* section title */
+.rc-section-title {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #C9A227;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(201,162,39,0.2);
+}
+
+/* stats grid — 3 across */
+.rc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.rc-stat {
+  background: #faf8f5;
+  border: 1px solid rgba(180,140,60,0.15);
+  border-top: 2px solid #C9A227;
+  border-radius: 5px;
+  padding: 12px 14px;
+}
+.rc-stat-lbl {
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a948e;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.rc-stat-val {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #6b1212;
+  line-height: 1.1;
+}
+.rc-stat-unit {
+  font-size: 9px;
+  color: #9a948e;
+  margin-top: 1px;
+  letter-spacing: 0.06em;
+}
+
+/* trip info rows */
+.rc-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: #faf8f5;
+  border: 1px solid rgba(180,140,60,0.15);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.rc-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(201,162,39,0.07);
+  gap: 8px;
+}
+.rc-info-row:nth-child(odd) { background: rgba(201,162,39,0.025); }
+.rc-info-lbl { font-size: 10px; color: #6a6460; font-weight: 400; }
+.rc-info-val { font-size: 11px; color: #6b1212; font-weight: 600; text-align: right; }
+
+/* GPS sample table */
+.rc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 9.5px;
+}
+.rc-table th {
+  background: #6b1212;
+  color: #FFF8E7;
+  padding: 7px 10px;
+  text-align: left;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.rc-table td {
+  padding: 6px 10px;
+  color: #6a6460;
+  border-bottom: 1px solid rgba(201,162,39,0.07);
+}
+.rc-table tr:nth-child(even) td { background: rgba(201,162,39,0.03); }
+.rc-table tr:last-child td { border-bottom: none; }
+.rc-table td:first-child { color: #C9A227; }
+
+/* footer */
+.rc-footer {
+  background: #6b1212;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(201,162,39,0.3);
+}
+.rc-footer-note {
+  font-size: 8.5px;
+  color: rgba(255,248,231,0.4);
+  letter-spacing: 0.08em;
+}
+.rc-footer-hash {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 9px;
+  color: rgba(201,162,39,0.5);
+  letter-spacing: 0.06em;
+}
+.rc-footer-stripe {
+  height: 5px;
+  background: repeating-linear-gradient(90deg,
+    #6b1212 0px, #6b1212 18px,
+    #C9A227 18px, #C9A227 20px,
+    #1a3d1a 20px, #1a3d1a 38px,
+    #C9A227 38px, #C9A227 40px);
+}
+</style>
+</head>
+<body>
+
+<div class="stripe"></div>
+
+<header>
+  <div>
+    <div class="logo">Biyahe <span class="hi">Check</span></div>
+    <div class="logo-sub">GPS Jeepney Route Tracker · PH</div>
+  </div>
+  <div class="trip-badge" id="badge">HINDI PA NAGSISIMULA</div>
+</header>
+
+<main>
+  <div class="ring-wrap">
+    <div class="ring-outer" id="ringOuter">
+      <div class="ring-inner">
+        <div class="spd-val" id="spdVal">—</div>
+        <div class="spd-unit">km / h</div>
+      </div>
+    </div>
+    <div class="status-lbl" id="statusLbl">naghihintay magsimula</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-lbl">Layo ng Biyahe</div>
+      <div class="card-val" id="distVal">0.000</div>
+      <div class="card-unit">kilometers</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Tagal ng Biyahe</div>
+      <div class="card-val" id="durVal">00:00</div>
+      <div class="card-unit">oras na lumipas</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Naitala</div>
+      <div class="card-val" id="ptsVal">0</div>
+      <div class="card-unit">GPS points</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Lakas ng GPS</div>
+      <div class="card-val" id="accVal">—</div>
+      <div class="card-unit">meters accuracy</div>
+      <div class="acc-bar-wrap">
+        <div class="acc-bar"><div class="acc-fill" id="accFill"></div></div>
+        <div class="acc-grade" id="accGrade">—</div>
+        <div class="sig">
+          <div class="sb" id="s1" style="height:4px"></div>
+          <div class="sb" id="s2" style="height:7px"></div>
+          <div class="sb" id="s3" style="height:10px"></div>
+          <div class="sb" id="s4" style="height:13px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="card-lbl">Ruta ng Biyahe</div>
+    <div id="map"></div>
+  </div>
+
+  <div class="log-box">
+    <div class="log-hd">
+      <span>Mga Lokasyong Naitala</span>
+      <span class="log-cnt" id="logCnt">0 pts</span>
+    </div>
+    <div class="log-scroll" id="logScroll">
+      <div class="log-empty" id="logEmpty">Pindutin ang "SIMULAN ANG BIYAHE" para magsimula</div>
+    </div>
+  </div>
+
+  <div class="perm-error" id="permError">
+    <strong>⚠ Hindi ma-access ang GPS</strong>
+    <span id="permMsg"></span>
+  </div>
+
+  <div class="summary-box" id="summaryBox">
+    <div class="sum-title">Buod ng Biyahe</div>
+    <div class="sum-row"><span>Petsa ng Biyahe</span><span id="sumDate">—</span></div>
+    <div class="sum-row"><span>Simula ng Biyahe</span><span id="sumStart">—</span></div>
+    <div class="sum-row"><span>Tapos ng Biyahe</span><span id="sumEnd">—</span></div>
+    <div class="sum-row"><span>Tagal ng Biyahe</span><span id="sumDur">—</span></div>
+    <div class="sum-row"><span>Layo ng Biyahe</span><span id="sumDist">—</span></div>
+    <div class="sum-row"><span>Bilang ng Naitalang Lokasyon</span><span id="sumPts">—</span></div>
+    <div class="sum-row"><span>Oras na Nakatigil</span><span id="sumIdle">—</span></div>
+    <div class="sum-row"><span>Bilang ng Hinto</span><span id="sumStops">—</span></div>
+    <div class="sum-row"><span>Karaniwang Bilis</span><span id="sumAvg">—</span></div>
+  </div>
+
+  <div class="btns">
+    <button class="btn btn-start"  id="btnStart"  onclick="startTrip()">▶ Simulan ang Biyahe</button>
+    <button class="btn btn-stop"   id="btnStop"   onclick="stopTrip()"   disabled>■ Tapusin ang Biyahe</button>
+    <button class="btn btn-image"  id="btnImage"  onclick="exportAsImage()" disabled>↓ I-save bilang Larawan (Ulat)</button>
+    <button class="btn btn-export" id="btnExport" onclick="exportCSV()"  disabled>↓ I-save ang mga Naitalang Lokasyon (CSV)</button>
+  </div>
+</main>
+
+<footer></footer>
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════
+     OFF-SCREEN REPORT CARD
+     Hidden from view; rendered to PNG on export
+════════════════════════════════════════════ -->
+<div id="reportCard">
+  <div class="rc-stripe"></div>
+  <div class="rc-header">
+    <div>
+      <div class="rc-logo-name">Biyahe <span>Check</span></div>
+      <div class="rc-logo-sub">GPS Jeepney Route Tracker · PH</div>
+    </div>
+    <div class="rc-header-right">
+      <div class="rc-report-label">Trip Report</div>
+      <div class="rc-trip-id" id="rcTripId">TRIP-—</div>
+      <div class="rc-generated" id="rcGenerated">—</div>
+    </div>
+  </div>
+
+  <div class="rc-body">
+
+    <!-- MAP -->
+    <div>
+      <div class="rc-section-title">Mapa ng Ruta</div>
+      <div class="rc-map-wrap">
+        <div id="reportMap"></div>
+        <div class="rc-map-legend">
+          <div class="rc-legend-item"><div class="rc-legend-dot" style="background:#1a3a8a"></div><span>Simula</span></div>
+          <div class="rc-legend-item"><div class="rc-legend-dot" style="background:#1a6e1a"></div><span>Katapusan</span></div>
+          <div class="rc-legend-item"><div class="rc-legend-dot" style="background:#c0392b"></div><span>Hinto</span></div>
+          <div class="rc-legend-item"><div style="width:24px;height:3px;background:#8a1c1c;border-radius:2px"></div><span>Ruta</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEY STATS -->
+    <div>
+      <div class="rc-section-title">Mga Pangunahing Sukatan</div>
+      <div class="rc-stats-grid">
+        <div class="rc-stat">
+          <div class="rc-stat-lbl">Layo ng Biyahe</div>
+          <div class="rc-stat-val" id="rcDist">—</div>
+          <div class="rc-stat-unit">kilometers</div>
+        </div>
+        <div class="rc-stat">
+          <div class="rc-stat-lbl">Tagal ng Biyahe</div>
+          <div class="rc-stat-val" id="rcDur">—</div>
+          <div class="rc-stat-unit">oras · minuto · segundo</div>
+        </div>
+        <div class="rc-stat">
+          <div class="rc-stat-lbl">Karaniwang Bilis</div>
+          <div class="rc-stat-val" id="rcAvg">—</div>
+          <div class="rc-stat-unit">km/h (habang gumagalaw)</div>
+        </div>
+        <div class="rc-stat">
+          <div class="rc-stat-lbl">Est. Idle Time</div>
+          <div class="rc-stat-val" id="rcIdle">—</div>
+          <div class="rc-stat-unit">minuto nakatigil</div>
+        </div>
+        <div class="rc-stat">
+          <div class="rc-stat-lbl">Bilang ng Hinto</div>
+          <div class="rc-stat-val" id="rcStops">—</div>
+          <div class="rc-stat-unit">stops (&ge;15 segundo)</div>
+        </div>
+        <div class="rc-stat">
+          <div class="rc-stat-lbl">GPS Points</div>
+          <div class="rc-stat-val" id="rcPts">—</div>
+          <div class="rc-stat-unit">naitalang lokasyon</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRIP DETAILS -->
+    <div>
+      <div class="rc-section-title">Detalye ng Biyahe</div>
+      <div class="rc-info-grid">
+        <div class="rc-info-row">
+          <span class="rc-info-lbl">Petsa ng Biyahe</span>
+          <span class="rc-info-val" id="rcDate">—</span>
+        </div>
+        <div class="rc-info-row">
+          <span class="rc-info-lbl">Simula ng Biyahe</span>
+          <span class="rc-info-val" id="rcStart">—</span>
+        </div>
+        <div class="rc-info-row">
+          <span class="rc-info-lbl">Katapusan ng Biyahe</span>
+          <span class="rc-info-val" id="rcEnd">—</span>
+        </div>
+        <div class="rc-info-row">
+          <span class="rc-info-lbl">Unang Koordinada</span>
+          <span class="rc-info-val" id="rcFirstCoord">—</span>
+        </div>
+        <div class="rc-info-row">
+          <span class="rc-info-lbl">Huling Koordinada</span>
+          <span class="rc-info-val" id="rcLastCoord">—</span>
+        </div>
+        <div class="rc-info-row">
+          <span class="rc-info-lbl">Pinakamataas na Bilis</span>
+          <span class="rc-info-val" id="rcMaxSpd">—</span>
+        </div>
+        <div class="rc-info-row">
+          <span class="rc-info-lbl">Mean GPS Accuracy</span>
+          <span class="rc-info-val" id="rcAccuracy">—</span>
+        </div>
+        <div class="rc-info-row">
+          <span class="rc-info-lbl">CSV Filename</span>
+          <span class="rc-info-val" id="rcFilename">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GPS SAMPLE TABLE -->
+    <div>
+      <div class="rc-section-title">Sampol ng GPS Data (unang 8 at huling 4 na tala)</div>
+      <table class="rc-table">
+        <thead>
+          <tr>
+            <th>Timestamp (PHT)</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Speed km/h</th>
+            <th>Accuracy m</th>
+            <th>Idle</th>
+          </tr>
+        </thead>
+        <tbody id="rcTableBody"></tbody>
+      </table>
+    </div>
+
+  </div><!-- end rc-body -->
+
+  <div class="rc-footer">
+    <div class="rc-footer-note">BIYAHE CHECK · GE 168 GNSS Mini-Project · Quezon City, PH</div>
+    <div class="rc-footer-hash" id="rcHash">—</div>
+  </div>
+  <div class="rc-footer-stripe"></div>
+</div><!-- end reportCard -->
+
+<script>
+/* ── state ── */
+var recording=false, watchId=null, intervalId=null;
+var rows=[], tripStart=null, durTick=null;
+var lastValidLat=null, lastValidLon=null, lastRawTime=null;
+var totalDist=0, tripNum=1;
+var IDLE_THRESHOLD=2.0, IDLE_MIN_SECONDS=15;
+var idleState=false, currentIdleSeconds=0, totalIdleSeconds=0, stopEvents=0;
+
+/* ── helpers ── */
+function haversine(la1,lo1,la2,lo2){
+  var R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
+  var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmtTime(d){
+  var h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';
+  h=h%12; if(!h)h=12; return pad(h)+':'+pad(m)+' '+ap;
+}
+function fmtDuration(s){
+  var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=Math.floor(s%60);
+  return (h>0?h+'h ':'')+m+'m '+ss+'s';
+}
+function toast(msg,ms){
+  ms=ms||2500;
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); },ms);
+}
+function tickDur(){
+  if(!tripStart) return;
+  var s=Math.floor((Date.now()-tripStart)/1000);
+  var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;
+  document.getElementById('durVal').textContent=(h>0?pad(h)+':':'')+pad(m)+':'+pad(ss);
+}
+/* simple hash for the report */
+function simpleHash(str){
+  var h=0;
+  for(var i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
+  return (h>>>0).toString(16).toUpperCase().padStart(8,'0');
+}
+
+/* ── accuracy UI ── */
+function updateAcc(acc){
+  document.getElementById('accVal').textContent=acc.toFixed(1);
+  var pct=Math.max(0,Math.min(100,100-(acc/50)*100));
+  var fill=document.getElementById('accFill');
+  fill.style.width=pct+'%';
+  var grade,color,bars;
+  if(acc<=5){grade='Napakalakas';color='#C9A227';bars=4;}
+  else if(acc<=10){grade='Malakas';color='#C9A227';bars=3;}
+  else if(acc<=20){grade='Katamtaman';color='#b07840';bars=2;}
+  else{grade='Mahina';color='#c0392b';bars=1;}
+  fill.style.background=color;
+  document.getElementById('accGrade').textContent=grade;
+  for(var i=1;i<=4;i++) document.getElementById('s'+i).classList.toggle('on',i<=bars);
+}
+
+/* ── live map ── */
+var map=null, routeLayer=null;
+function initMap(){
+  map=L.map('map',{zoomControl:true}).setView([14.5995,120.9842],12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+  routeLayer=L.layerGroup().addTo(map);
+}
+function drawRouteOnMap(){
+  if(!map||rows.length===0) return;
+  routeLayer.clearLayers();
+  var coords=rows.map(function(r){return [parseFloat(r.latitude),parseFloat(r.longitude)];});
+  var poly=L.polyline(coords,{color:'#8a1c1c',weight:4,opacity:0.85}).addTo(routeLayer);
+  L.marker(coords[0]).bindPopup('Simula · '+fmtTime(new Date(rows[0].timestamp))).addTo(routeLayer);
+  L.marker(coords[coords.length-1]).bindPopup('Katapusan · '+fmtTime(new Date(rows[rows.length-1].timestamp))).addTo(routeLayer);
+  for(var i=1;i<rows.length-1;i++){
+    if(parseFloat(rows[i].speed_kmh)<=1){
+      L.circleMarker([parseFloat(rows[i].latitude),parseFloat(rows[i].longitude)],
+        {radius:5,color:'#c0392b',fill:true,fillColor:'#c0392b',fillOpacity:0.8})
+       .bindPopup('Hinto · '+fmtTime(new Date(rows[i].timestamp))).addTo(routeLayer);
+    }
+  }
+  map.fitBounds(poly.getBounds(),{padding:[28,28]});
+}
+window.addEventListener('load',initMap);
+
+/* ── report map (separate Leaflet instance, off-screen) ── */
+var reportMap=null, reportRouteLayer=null;
+function initReportMap(){
+  if(reportMap) return;
+  reportMap=L.map('reportMap',{zoomControl:false,attributionControl:false}).setView([14.5995,120.9842],12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{maxZoom:19}).addTo(reportMap);
+  reportRouteLayer=L.layerGroup().addTo(reportMap);
+}
+function drawReportMap(){
+  if(!reportMap){ initReportMap(); }
+  reportRouteLayer.clearLayers();
+  if(rows.length===0) return;
+  var coords=rows.map(function(r){return [parseFloat(r.latitude),parseFloat(r.longitude)];});
+  var poly=L.polyline(coords,{color:'#8a1c1c',weight:5,opacity:0.9}).addTo(reportRouteLayer);
+
+  /* start marker — blue */
+  L.circleMarker(coords[0],{radius:8,color:'#fff',weight:2,fill:true,fillColor:'#1a3a8a',fillOpacity:1})
+   .bindPopup('Simula').addTo(reportRouteLayer);
+
+  /* end marker — green */
+  L.circleMarker(coords[coords.length-1],{radius:8,color:'#fff',weight:2,fill:true,fillColor:'#1a6e1a',fillOpacity:1})
+   .bindPopup('Katapusan').addTo(reportRouteLayer);
+
+  /* stop markers — red */
+  for(var i=1;i<rows.length-1;i++){
+    if(parseFloat(rows[i].speed_kmh)<=1){
+      L.circleMarker([parseFloat(rows[i].latitude),parseFloat(rows[i].longitude)],
+        {radius:5,color:'#fff',weight:1.5,fill:true,fillColor:'#c0392b',fillOpacity:0.9})
+       .addTo(reportRouteLayer);
+    }
+  }
+  reportMap.fitBounds(poly.getBounds(),{padding:[20,20]});
+  reportMap.invalidateSize();
+}
+
+/* ── GPS position handler ── */
+function processPosition(pos){
+  if(!recording) return;
+  var c=pos.coords;
+  var lat=c.latitude, lon=c.longitude;
+  var spd=c.speed!=null?c.speed*3.6:0;
+  var acc=c.accuracy, alt=c.altitude, hdg=c.heading;
+  var now=new Date();
+  var ts=new Date(now.getTime()+8*60*60*1000).toISOString().replace('Z','+08:00');
+  var isIdle=spd<IDLE_THRESHOLD;
+  var rawDt=lastRawTime?(now-lastRawTime)/1000:0;
+
+  if(rawDt>0){
+    if(isIdle){
+      totalIdleSeconds+=rawDt; currentIdleSeconds+=rawDt;
+      if(currentIdleSeconds>=IDLE_MIN_SECONDS&&!idleState){idleState=true;stopEvents++;}
+    } else { currentIdleSeconds=0; idleState=false; }
+  }
+  lastRawTime=now;
+
+  updateAcc(acc);
+  var sv=document.getElementById('spdVal');
+  sv.textContent=spd.toFixed(1); sv.classList.toggle('mv',spd>1);
+
+  var sl=document.getElementById('statusLbl'), b=document.getElementById('badge');
+  if(idleState){ sl.innerHTML='<span class="dot"></span>nakahinto — nagtatala'; b.textContent='STOPPED'; }
+  else if(spd>=IDLE_THRESHOLD){ sl.innerHTML='<span class="dot"></span>gumagalaw — nagtatala'; b.textContent='MOVING'; }
+  else{ sl.innerHTML='<span class="dot"></span>naghihintay — nagtatala'; b.textContent='IDLE'; }
+  b.classList.add('active');
+
+  if(lastValidLat!==null&&lastValidLon!==null){
+    var seg=haversine(lastValidLat,lastValidLon,lat,lon);
+    if(seg*1000>Math.max(2,acc*0.2)){ totalDist+=seg; lastValidLat=lat; lastValidLon=lon; }
+  } else { lastValidLat=lat; lastValidLon=lon; }
+  document.getElementById('distVal').textContent=totalDist.toFixed(3);
+
+  rows.push({
+    timestamp:ts, latitude:lat.toFixed(8), longitude:lon.toFixed(8),
+    speed_kmh:spd.toFixed(2), accuracy_m:acc.toFixed(2),
+    heading_deg:hdg!=null?hdg.toFixed(1):'', altitude_m:alt!=null?alt.toFixed(2):'',
+    is_idle:isIdle, cumulative_distance_km:totalDist.toFixed(3),
+    total_idle_seconds:Math.round(totalIdleSeconds), stop_count:stopEvents
+  });
+
+  var n=rows.length;
+  document.getElementById('ptsVal').textContent=n;
+  document.getElementById('logCnt').textContent=n+' pts';
+  var ls=document.getElementById('logScroll');
+  document.getElementById('logEmpty').style.display='none';
+  var d=document.createElement('div');
+  d.className='log-row';
+  d.innerHTML='<span class="ts">'+fmtTime(new Date(ts))+'</span>'+
+    '<span>'+lat.toFixed(5)+', '+lon.toFixed(5)+'</span>'+
+    '<span class="spd-tag">'+spd.toFixed(1)+' km/h</span>';
+  ls.insertBefore(d,ls.firstChild);
+  if(ls.children.length>80) ls.removeChild(ls.lastChild);
+  if(rows.length===1&&map) map.setView([lat,lon],15);
+  if(rows.length%8===0) drawRouteOnMap();
+}
+
+function onErr(e){
+  var msg=e.code===1?'I-enable ang Location Permission sa Settings ng browser mo at subukan muli.':
+          e.code===2?'Hindi makita ang GPS signal. Lumabas sa mas bukas na lugar.':
+          'Nag-timeout ang GPS. Subukang muli.';
+  document.getElementById('permMsg').textContent=msg;
+  document.getElementById('permError').classList.add('show');
+  toast('GPS error — '+msg,5000);
+}
+
+/* ── start/stop ── */
+function startTrip(){
+  if(!navigator.geolocation){toast('Hindi sinusuportahan ang Geolocation ng device na ito.');return;}
+  rows=[];totalDist=0;lastValidLat=null;lastValidLon=null;lastRawTime=null;
+  currentIdleSeconds=0;totalIdleSeconds=0;stopEvents=0;idleState=false;recording=true;
+  tripStart=Date.now();
+  document.getElementById('distVal').textContent='0.000';
+  document.getElementById('ptsVal').textContent='0';
+  document.getElementById('durVal').textContent='00:00';
+  document.getElementById('spdVal').textContent='—';
+  document.getElementById('spdVal').classList.remove('mv');
+  document.getElementById('logScroll').innerHTML='<div class="log-empty" id="logEmpty">Naghahanap ng GPS signal…</div>';
+  document.getElementById('logCnt').textContent='0 pts';
+  document.getElementById('summaryBox').classList.remove('show');
+  document.getElementById('permError').classList.remove('show');
+  document.getElementById('btnStart').disabled=true;
+  document.getElementById('btnStop').disabled=false;
+  document.getElementById('btnImage').disabled=true;
+  document.getElementById('btnExport').disabled=true;
+  document.getElementById('ringOuter').classList.add('rec');
+  document.getElementById('statusLbl').innerHTML='<span class="dot"></span>naghahanap ng signal…';
+  var b=document.getElementById('badge');
+  b.textContent='BIYAHE '+tripNum; b.classList.add('active');
+  durTick=setInterval(tickDur,1000);
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      processPosition(pos);
+      watchId=navigator.geolocation.watchPosition(processPosition,onErr,{enableHighAccuracy:true,timeout:10000,maximumAge:0});
+      intervalId=setInterval(function(){
+        if(!recording)return;
+        navigator.geolocation.getCurrentPosition(processPosition,function(){},{enableHighAccuracy:true,timeout:3000,maximumAge:1000});
+      },1000);
+    },
+    function(e){
+      onErr(e); recording=false; clearInterval(durTick);
+      document.getElementById('btnStart').disabled=false;
+      document.getElementById('btnStop').disabled=true;
+      document.getElementById('ringOuter').classList.remove('rec');
+      document.getElementById('statusLbl').textContent='tinanggihan ang GPS — subukan muli';
+      document.getElementById('badge').classList.remove('active');
+      document.getElementById('badge').textContent='HINDI PA NAGSISIMULA';
+    },
+    {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+  );
+  toast('Sinisimulan na ang pagtala ng biyahe.');
+}
+
+function stopTrip(){
+  recording=false;
+  if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+  if(intervalId!==null){clearInterval(intervalId);intervalId=null;}
+  clearInterval(durTick);
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('btnExport').disabled=rows.length===0;
+  document.getElementById('btnImage').disabled=rows.length===0;
+  document.getElementById('ringOuter').classList.remove('rec');
+  document.getElementById('statusLbl').textContent='tapos na — '+rows.length+' naitalang lokasyon';
+  var b=document.getElementById('badge');
+  b.textContent='TAPOS NA'; b.classList.remove('active');
+  document.getElementById('spdVal').textContent='—';
+  document.getElementById('spdVal').classList.remove('mv');
+
+  if(rows.length>0){
+    var t0=new Date(rows[0].timestamp),t1=new Date(rows[rows.length-1].timestamp);
+    var el=Math.floor((t1-t0)/1000);
+    var h=Math.floor(el/3600),m=Math.floor((el%3600)/60),s=el%60;
+    var dur=(h>0?h+'h ':'')+m+'m '+s+'s';
+    var movSpeeds=rows.map(function(r){return parseFloat(r.speed_kmh);}).filter(function(v){return v>2;});
+    var avgSpd=movSpeeds.length>0?(movSpeeds.reduce(function(a,b){return a+b;},0)/movSpeeds.length).toFixed(1):'0.0';
+    document.getElementById('sumDate').textContent=t0.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+    document.getElementById('sumStart').textContent=fmtTime(t0);
+    document.getElementById('sumEnd').textContent=fmtTime(t1);
+    document.getElementById('sumDur').textContent=dur;
+    document.getElementById('sumDist').textContent=totalDist.toFixed(3)+' km';
+    document.getElementById('sumPts').textContent=rows.length;
+    document.getElementById('sumIdle').textContent=fmtDuration(totalIdleSeconds);
+    document.getElementById('sumStops').textContent=stopEvents;
+    document.getElementById('sumAvg').textContent=avgSpd+' km/h';
+    document.getElementById('summaryBox').classList.add('show');
+  }
+  drawRouteOnMap();
+  toast('Natapos na. May '+rows.length+' naitalang lokasyon.',3500);
+  tripNum++;
+}
+
+/* ── CSV export ── */
+function exportCSV(){
+  if(rows.length===0){toast('Walang data para i-export.');return;}
+  var hdr='timestamp,latitude,longitude,speed_kmh,accuracy_m,heading_deg,altitude_m,is_idle,cumulative_distance_km,total_idle_seconds,stop_count\n';
+  var body=rows.map(function(r){
+    return [r.timestamp,r.latitude,r.longitude,r.speed_kmh,r.accuracy_m,
+            r.heading_deg,r.altitude_m,r.is_idle,r.cumulative_distance_km,
+            r.total_idle_seconds,r.stop_count].join(',');
+  }).join('\n');
+  var date=new Date().toISOString().slice(0,10);
+  var name='biyahecheck_trip'+(tripNum-1)+'_'+date+'.csv';
+  var blob=new Blob([hdr+body],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download=name; a.click();
+  URL.revokeObjectURL(url);
+  toast('Na-save: '+name,3000);
+}
+
+/* ── IMAGE EXPORT — renders the off-screen report card ── */
+function exportAsImage(){
+  if(rows.length===0){toast('Walang data para i-save.');return;}
+  toast('Inihahanda ang ulat… sandali lang.',3000);
+
+  /* 1. Populate all report card fields */
+  var t0=new Date(rows[0].timestamp), t1=new Date(rows[rows.length-1].timestamp);
+  var el=Math.floor((t1-t0)/1000);
+  var h=Math.floor(el/3600),m=Math.floor((el%3600)/60),s=el%60;
+  var dur=(h>0?h+'h ':'')+m+'m '+s+'s';
+  var movSpeeds=rows.map(function(r){return parseFloat(r.speed_kmh);}).filter(function(v){return v>2;});
+  var avgSpd=movSpeeds.length>0?(movSpeeds.reduce(function(a,b){return a+b;},0)/movSpeeds.length).toFixed(1):'0.0';
+  var maxSpd=Math.max.apply(null,rows.map(function(r){return parseFloat(r.speed_kmh);})).toFixed(1);
+  var meanAcc=(rows.reduce(function(a,r){return a+parseFloat(r.accuracy_m);},0)/rows.length).toFixed(1);
+  var date=new Date().toISOString().slice(0,10);
+  var csvName='biyahecheck_trip'+(tripNum-1)+'_'+date+'.csv';
+
+  /* hash from first+last coord + distance (lightweight integrity stamp) */
+  var hashSrc=rows[0].latitude+'|'+rows[0].longitude+'|'+rows[rows.length-1].latitude+'|'+rows[rows.length-1].longitude+'|'+totalDist.toFixed(3);
+  var hash=simpleHash(hashSrc);
+
+  document.getElementById('rcTripId').textContent='TRIP-'+(tripNum-1)+'-'+hash.slice(0,6);
+  document.getElementById('rcGenerated').textContent='Na-generate: '+new Date().toLocaleString('en-PH');
+  document.getElementById('rcDist').textContent=totalDist.toFixed(3);
+  document.getElementById('rcDur').textContent=dur;
+  document.getElementById('rcAvg').textContent=avgSpd;
+  document.getElementById('rcIdle').textContent=(totalIdleSeconds/60).toFixed(1);
+  document.getElementById('rcStops').textContent=stopEvents;
+  document.getElementById('rcPts').textContent=rows.length;
+  document.getElementById('rcDate').textContent=t0.toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('rcStart').textContent=fmtTime(t0);
+  document.getElementById('rcEnd').textContent=fmtTime(t1);
+  document.getElementById('rcFirstCoord').textContent=parseFloat(rows[0].latitude).toFixed(5)+', '+parseFloat(rows[0].longitude).toFixed(5);
+  document.getElementById('rcLastCoord').textContent=parseFloat(rows[rows.length-1].latitude).toFixed(5)+', '+parseFloat(rows[rows.length-1].longitude).toFixed(5);
+  document.getElementById('rcMaxSpd').textContent=maxSpd+' km/h';
+  document.getElementById('rcAccuracy').textContent=meanAcc+' m';
+  document.getElementById('rcFilename').textContent=csvName;
+  document.getElementById('rcHash').textContent='SHA: '+hash;
+
+  /* 2. Sample GPS rows — first 8 + last 4 */
+  var sampleRows=rows.slice(0,8).concat(rows.length>12?rows.slice(-4):[]);
+  var tbody=document.getElementById('rcTableBody');
+  tbody.innerHTML='';
+  sampleRows.forEach(function(r,idx){
+    if(idx===8){
+      var sep=document.createElement('tr');
+      sep.innerHTML='<td colspan="6" style="text-align:center;color:#C9A227;font-size:9px;padding:4px;letter-spacing:0.1em;">· · · '+( rows.length-12)+' pa pang tala · · ·</td>';
+      tbody.appendChild(sep);
+    }
+    var tr=document.createElement('tr');
+    var ts=r.timestamp.replace('T',' ').replace('+08:00','');
+    tr.innerHTML='<td>'+ts+'</td><td>'+parseFloat(r.latitude).toFixed(6)+'</td><td>'+parseFloat(r.longitude).toFixed(6)+'</td><td>'+r.speed_kmh+'</td><td>'+r.accuracy_m+'</td><td>'+(r.is_idle?'✓':'')+'</td>';
+    tbody.appendChild(tr);
+  });
+
+  /* 3. Draw the report map, then wait for tiles + small settle delay */
+  var rc=document.getElementById('reportCard');
+  rc.style.left='-9999px'; /* keep off-screen */
+
+  initReportMap();
+  drawReportMap();
+
+  setTimeout(function(){
+    reportMap.invalidateSize();
+
+    /* 4. Run html2canvas on the report card */
+    setTimeout(function(){
+      html2canvas(rc,{
+        useCORS:   true,
+        allowTaint:false,
+        scale:     2,
+        width:     780,
+        windowWidth: 780,
+        backgroundColor: '#f0ede8',
+        logging: false
+      }).then(function(canvas){
+        var a=document.createElement('a');
+        a.download='biyahe_ulat_trip'+(tripNum-1)+'_'+date+'.png';
+        a.href=canvas.toDataURL('image/png');
+        a.click();
+        toast('Na-save ang ulat ng biyahe!',3500);
+      }).catch(function(e){
+        console.error(e);
+        toast('Error sa pag-save ng ulat.');
+      });
+    }, 1800); /* wait for map tiles to paint */
+  }, 200);
+}
+</script>
+</body>
+</html>
